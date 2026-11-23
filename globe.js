@@ -397,7 +397,8 @@
     const start = performance.now();
     function paint(now) {
       if (!screen.open || !screen.isConnected) return;
-      const longitude = HOME[0] + (now - start) * 0.24;
+      const elapsedSeconds = (now - start) / 1000;
+      const longitude = HOME[0] + elapsedSeconds * 40;
       texture.draw(dots, camera(longitude, HOME[1]), canvas.width / 2, currentPalette().inks, -1);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const left = (canvas.width - texture.canvas.width) / 2;

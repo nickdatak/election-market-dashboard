@@ -100,6 +100,13 @@ body {
 }
 
 /* The opening screen follows the saved theme before the atlas has finished loading. */
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('./instrument-serif-italic-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
 #opening-screen[open] {
   position: fixed;
   inset: 0;
@@ -118,6 +125,15 @@ body {
   background: radial-gradient(ellipse at center, var(--scene-glow), transparent 56%), var(--page);
 }
 #opening-screen::backdrop { background: transparent; }
+.opening-scene {
+  display: grid;
+  justify-items: center;
+  gap: clamp(18px, 3.5vmin, 32px);
+  max-width: 100%;
+  margin: 0;
+  padding: 0 16px;
+  text-align: center;
+}
 .opening-globe {
   position: relative;
   width: clamp(132px, 22vmin, 220px);
@@ -125,6 +141,7 @@ body {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 50%;
+  transform: rotate(-16deg);
   background: radial-gradient(circle at 33% 27%, var(--paper), var(--page) 80%);
   box-shadow: 0 0 36px var(--scene-glow);
 }
@@ -138,7 +155,7 @@ body {
 }
 .opening-globe::before {
   inset: 0 18%;
-  animation: opening-meridian 1s linear infinite;
+  animation: opening-meridian 4.5s linear infinite;
 }
 .opening-globe::after { inset: 34% -1px; }
 @keyframes opening-meridian {
@@ -153,6 +170,37 @@ body {
 }
 .opening-globe:has(canvas[data-painted])::before,
 .opening-globe:has(canvas[data-painted])::after { display: none; }
+#opening-caption {
+  display: grid;
+  justify-items: center;
+  gap: clamp(10px, 1.6vmin, 16px);
+  color: var(--ink);
+  font: italic 400 clamp(25px, calc(8px + 5.4vw), 48px)/1.1 'Instrument Serif', Georgia, serif;
+}
+.opening-inscription { text-wrap: balance; }
+.opening-exchanges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.6vmin, 16px);
+}
+.opening-exchanges svg {
+  display: block;
+  width: auto;
+  fill: currentColor;
+}
+.opening-kalshi {
+  height: clamp(17px, 2.6vmin, 23px);
+  color: var(--kalshi-logo);
+}
+.opening-polymarket {
+  height: clamp(20px, 3vmin, 27px);
+  color: var(--polymarket-logo);
+}
+.opening-ampersand {
+  color: var(--muted);
+  font-size: clamp(19px, 2.7vmin, 25px);
+}
 
 button,
 input,

@@ -29,6 +29,8 @@ const assets = new Set([
   'montserrat-latin-ext.woff2',
   'montserrat-cyrillic.woff2',
   'montserrat-license.txt',
+  'instrument-serif-italic-latin.woff2',
+  'instrument-serif-license.txt',
   'app.js',
   'theme.js',
   'chart.js',
