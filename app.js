@@ -870,8 +870,9 @@
     note.hidden = !note.hidden;
     event.currentTarget.setAttribute('aria-expanded', String(!note.hidden));
   };
-  document.querySelectorAll('dialog').forEach((dialog) => {
-    dialog.querySelector('.close-dialog').onclick = () => dialog.close();
+  document.querySelectorAll('dialog .close-dialog').forEach((button) => {
+    const dialog = button.closest('dialog');
+    button.onclick = () => dialog.close();
     dialog.addEventListener('click', (e) => {
       if (e.target === dialog) dialog.close();
     });
@@ -925,6 +926,8 @@
     formatDate, esc, sourceTag, sourceName,
   });
   window.addEventListener('hashchange', navigate);
+  const openingCanvas = document.querySelector('#opening-screen[open] canvas');
+  if (openingCanvas) window.ElectionGlobe.drawOpeningGlobe(openingCanvas);
   navigate();
   restoreLive();
 })();

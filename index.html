@@ -41,6 +41,30 @@
     <script defer src="app.js"></script>
   </head>
   <body data-page="overview">
+    <dialog id="opening-screen" aria-label="Loading election dashboard">
+      <div class="opening-globe" aria-hidden="true">
+        <canvas width="320" height="320"></canvas>
+      </div>
+    </dialog>
+    <script>
+      (() => {
+        const screen = document.getElementById('opening-screen');
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches || !screen.showModal || !screen.animate) {
+          screen.remove();
+          return;
+        }
+        screen.showModal();
+        const reveal = screen.animate([{ opacity: 1, offset: 0.82 }, { opacity: 0 }], 1500);
+        reveal.startTime = performance.now();
+        function dismiss() {
+          screen.close();
+          screen.remove();
+          window.removeEventListener('pagehide', dismiss);
+        }
+        reveal.onfinish = dismiss;
+        window.addEventListener('pagehide', dismiss, { once: true });
+      })();
+    </script>
     <!-- Kalshi's published wordmark, from the header artwork at docs.kalshi.com. -->
     <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
       <symbol id="kalshi-wordmark" viewBox="0 0 300 88">

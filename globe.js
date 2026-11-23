@@ -387,6 +387,28 @@
     return { canvas, draw };
   }
 
+  // Reuse the atlas's land samples and projection at a smaller scale during startup.
+  function drawOpeningGlobe(canvas) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx || !window.ElectionCountries?.features) return;
+    const screen = canvas.closest('dialog');
+    const dots = landDots(window.ElectionCountries.features, 44);
+    const texture = dotLayer();
+    const start = performance.now();
+    function paint(now) {
+      if (!screen.open || !screen.isConnected) return;
+      const longitude = HOME[0] + (now - start) * 0.24;
+      texture.draw(dots, camera(longitude, HOME[1]), canvas.width / 2, currentPalette().inks, -1);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const left = (canvas.width - texture.canvas.width) / 2;
+      const top = (canvas.height - texture.canvas.height) / 2;
+      ctx.drawImage(texture.canvas, left, top);
+      requestAnimationFrame(paint);
+    }
+    paint(start);
+    canvas.dataset.painted = '';
+  }
+
   function create(canvas, options = {}) {
     const ctx = canvas.getContext('2d');
     const features = window.ElectionCountries?.features || [];
@@ -771,5 +793,5 @@
     };
   }
 
-  window.ElectionGlobe = { create };
+  window.ElectionGlobe = { create, drawOpeningGlobe };
 })();

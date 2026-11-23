@@ -98,6 +98,62 @@ body {
   font-family: var(--sans);
   font-weight: 420;
 }
+
+/* The opening screen follows the saved theme before the atlas has finished loading. */
+#opening-screen[open] {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: radial-gradient(ellipse at center, var(--scene-glow), transparent 56%), var(--page);
+}
+#opening-screen::backdrop { background: transparent; }
+.opening-globe {
+  position: relative;
+  width: clamp(132px, 22vmin, 220px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: radial-gradient(circle at 33% 27%, var(--paper), var(--page) 80%);
+  box-shadow: 0 0 36px var(--scene-glow);
+}
+.opening-globe::before,
+.opening-globe::after {
+  content: '';
+  position: absolute;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  opacity: .55;
+}
+.opening-globe::before {
+  inset: 0 18%;
+  animation: opening-meridian 1s linear infinite;
+}
+.opening-globe::after { inset: 34% -1px; }
+@keyframes opening-meridian {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(180deg); }
+}
+.opening-globe canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.opening-globe:has(canvas[data-painted])::before,
+.opening-globe:has(canvas[data-painted])::after { display: none; }
+
 button,
 input,
 select,
