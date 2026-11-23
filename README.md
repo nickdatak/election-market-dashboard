@@ -1,10 +1,14 @@
 # Election Market Dashboard
 
-Explore election contracts on Kalshi and Polymarket, inspect their price histories, and compare trading rules against the same historical observations. The dashboard uses vanilla HTML, CSS and JavaScript. Trades run as simulations in your browser. The only server component reads public exchange data.
+Explore election contracts on Kalshi and Polymarket, inspect their price histories, and simulate trading rules in your browser. **No exchange account, wallet or API key is required.**
+
+The dashboard is intentionally simple so anyone can run it and modify it. It uses plain HTML, CSS and JavaScript. To try a change, edit the layout in `index.html` or a strategy rule in `backtest.js`, save the file, and refresh your browser. A small Node.js server handles public data requests from both exchanges.
+
+![Atlas overview with the United States selected and a panel listing Kalshi and Polymarket election contracts](docs/screenshots/overview.png)
 
 ## Run it locally
 
-1. Download the repository using **Code → Download ZIP** and extract it, or clone it with Git. A private repository requires GitHub access to download. The dashboard itself requires no exchange account, wallet or API key.
+1. Download the repository using **Code → Download ZIP** and extract it, or clone it with Git. A private repository requires GitHub access to download.
 2. Open a terminal in the extracted folder that contains `index.html` and `server.mjs`. Install a current Node.js LTS release if `node --version` is unavailable. The server uses built-in Node.js modules and fetch, so you can skip package installation and build steps. [Download Node.js](https://nodejs.org/en/download)
 3. Start the server and leave the terminal open.
 
@@ -38,6 +42,10 @@ Use this mode to compare entry and exit rules on the same contracts, or assign a
 3. Leave **Assign fetched contracts to every strategy** checked to share the selection across existing strategies, or change individual assignments in the picker. The picker orders the selected market universe by lifetime volume. Volume affects the display order only.
 4. For each strategy choose **Yes** or **No**, a fixed dollar stake, and entry conditions. Combine conditions with **all** or **any**. Rules include price thresholds, crossings and daily changes. Optional exit conditions also support gains and losses in percentage points from the actual entry price.
 5. Select **Run all strategies**. History is fetched once per distinct contract for that run. Each strategy can enter a contract once using up to 90 days of observations before settlement or the active replay cutoff. Without a filled exit, a settled position receives its payout and a live position is valued at the latest eligible mark. Use the chart selector for the portfolio total, overlaid strategies or one strategy. The trade records and skip reasons explain the totals.
+
+![Backtest results comparing Buy Yes and Buy No on the same three contracts, with a profit and loss chart and per-strategy returns](docs/screenshots/backtest.png)
+
+In this replay, each strategy staked $100 per contract on the same three Polymarket contracts for the 2028 U.S. presidential election. All six positions were still open on November 22, 2026, so the chart values them at their last observed prices.
 
 ## Time-frame trading
 
