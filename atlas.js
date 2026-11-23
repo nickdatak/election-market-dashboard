@@ -165,6 +165,7 @@
     function positionLabels(projectCountry) {
       if (!callouts || !projectCountry || !callouts.getClientRects().length) return;
       const canvasRect = canvas.getBoundingClientRect();
+      if (canvasRect.bottom <= 0 || canvasRect.top >= window.innerHeight) return;
       if (measuredWidth !== window.innerWidth) measureLabels(callouts.getBoundingClientRect());
       const occupied = panels
         .map((el) => el.getBoundingClientRect())

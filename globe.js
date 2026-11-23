@@ -435,7 +435,7 @@
     let cameraRevision = 0;
     let view = camera(lon, lat);
     let spinSpeed = IDLE_DEGREES_PER_SECOND, lastSpin = null, spinTimer = 0;
-    let sceneVisible = true, autoRotate = true;
+    let sceneVisible = true, globeVisible = true, autoRotate = true;
     let mousePosition = null, lastHoverCheck = 0;
     let moved = true,
       viewChanged = true,
@@ -606,7 +606,7 @@
       frame = 0;
       clearTimeout(spinTimer);
       if (dead || !radius) return;
-      const canSpin = autoRotate && sceneVisible && !document.hidden && !reducedMotion.matches && !pointer;
+      const canSpin = autoRotate && sceneVisible && globeVisible && !document.hidden && !reducedMotion.matches && !pointer;
       if (animation) {
         lastSpin = null;
         const t = clamp((now - animation.start) / animation.duration, 0, 1);
@@ -713,7 +713,7 @@
       lastSpin = null;
       mousePosition = null;
       pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, lon, lat, dragged: false };
-      canvas.setPointerCapture(event.pointerId);
+      if (event.pointerType !== 'touch') canvas.setPointerCapture(event.pointerId);
     }
 
     function move(event) {
@@ -728,12 +728,17 @@
       if (pointer.id !== event.pointerId || pointer.scrolling || !radius) return;
       const dx = event.clientX - pointer.x,
         dy = event.clientY - pointer.y;
-      if (!pointer.dragged && Math.hypot(dx, dy) < 4) return;
-      if (!pointer.dragged && event.pointerType === 'touch' && Math.abs(dy) > Math.abs(dx)) {
-        pointer.scrolling = true;
-        return;
+      if (!pointer.dragged) {
+        const touch = event.pointerType === 'touch';
+        if (Math.hypot(dx, dy) < (touch ? 8 : 4)) return;
+        if (touch && Math.abs(dy) >= Math.abs(dx)) {
+          pointer.scrolling = true;
+          if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+          return;
+        }
+        if (touch && !canvas.hasPointerCapture(event.pointerId)) canvas.setPointerCapture(event.pointerId);
+        pointer.dragged = true;
       }
-      pointer.dragged = true;
       hover(null);
       setView(pointer.lon - (dx * 75) / radius, pointer.lat + (dy * 75) / radius);
       invalidate();
@@ -791,11 +796,15 @@
     for (const [type, fn] of Object.entries(events)) canvas.addEventListener(type, fn);
     const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(resize) : null;
     observer?.observe(canvas);
-    const visibility = typeof IntersectionObserver === 'function' ? new IntersectionObserver(([entry]) => {
-      sceneVisible = entry.isIntersecting;
+    const visibility = typeof IntersectionObserver === 'function' ? new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === canvas) globeVisible = entry.isIntersecting;
+        else sceneVisible = entry.isIntersecting;
+      }
       restartClock();
     }) : null;
-    visibility?.observe(options.motionRegion || canvas);
+    visibility?.observe(canvas);
+    if (options.motionRegion) visibility?.observe(options.motionRegion);
     document.addEventListener('visibilitychange', restartClock);
     reducedMotion.addEventListener('change', restartClock);
     window.addEventListener('resize', resize);

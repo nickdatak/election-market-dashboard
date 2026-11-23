@@ -938,13 +938,39 @@ body:not([data-page='overview']) .atlas-map {
     gap: 6px;
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 760px), (pointer: coarse) and (max-width: 1000px) and (max-height: 520px) {
   :root {
     --gutter: clamp(15px, 4.5vw, 28px);
     --mast-h: 69px;
     --globe-size: min(100vw, 535px);
     --orb-x: 50%;
     --orb-y: calc(215px + 0.5 * var(--globe-size));
+    overscroll-behavior-y: none;
+  }
+  :root:has(dialog:modal) {
+    overflow: hidden;
+  }
+  dialog:modal {
+    overscroll-behavior: contain;
+  }
+  /* Keep the stars behind the page while the interactive Earth and its controls scroll together. */
+  body[data-page='overview'] .space-scene {
+    display: contents;
+  }
+  body[data-page='overview'] .space-scene > .starfield {
+    position: fixed;
+    z-index: -1;
+  }
+  body[data-page='overview'] .atlas-map {
+    grid-area: 2 / 1;
+    position: relative;
+    inset: auto;
+    transform: none;
+    justify-self: center;
+    width: min(100%, 465px, 68svh);
+    height: auto;
+    aspect-ratio: 1;
+    overflow: clip;
   }
   .mast-inner {
     grid-template: auto auto / minmax(0, 1fr) auto;
@@ -986,13 +1012,17 @@ body:not([data-page='overview']) .atlas-map {
   }
   .workspace-lead {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto min(93vw, 502px) auto auto;
+    grid-template-rows: auto auto auto auto;
     min-height: 0;
-    gap: 14px 0;
-    padding: 20px 0 8px;
+    gap: 10px 0;
+    padding: 10px 0 8px;
   }
   .atlas-intro {
-    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+    align-items: center;
+    gap: 5px 10px;
+    padding: 8px 12px 10px;
     grid-area: 1 / 1;
     width: 100%;
     margin: 0;
@@ -1002,22 +1032,40 @@ body:not([data-page='overview']) .atlas-map {
     font-size: 11px;
   }
   .atlas-locations {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
-    align-items: end;
-    gap: 14px;
-    margin-top: 10px;
+    display: contents;
   }
   .atlas-counts {
-    --count-size: clamp(37px, 7vw, 46px);
-    gap: 8px;
+    grid-column: 1 / -1;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: baseline;
+    gap: 10px;
     margin: 0;
   }
+  .atlas-counts > div {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    container-type: normal;
+  }
+  .atlas-counts b {
+    flex: none;
+    font-size: 18px;
+    font-weight: 475;
+    letter-spacing: -.035em;
+  }
   .atlas-counts span {
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.25;
   }
   .atlas-picker {
-    width: 100%;
+    grid-area: 1 / 2;
+    width: min(40vw, 180px);
+    min-width: 150px;
+  }
+  .atlas-picker select {
+    min-height: 40px;
+    font-size: 16px;
+    padding-block: 5px;
   }
   .atlas-foot {
     grid-area: 3 / 1;
@@ -1097,36 +1145,39 @@ body:not([data-page='overview']) .atlas-map {
     padding: 7px 9px;
   }
   .atlas-picker select {
-    font-size: 12px;
-    padding: 9px 19px 9px 26px;
+    padding-inline: 9px 17px;
   }
   .atlas-picker::after {
     right: 9px;
   }
   .atlas-picker > [data-icon] {
-    left: 7px;
+    display: none;
   }
 }
-@media (max-width: 520px) {
-  .atlas-intro {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(152px, 1fr);
-    align-items: center;
-    gap: 12px 8px;
-    padding: 13px 12px;
+@media (pointer: coarse) and (orientation: landscape) and (min-width: 500px) and (max-width: 1000px) and (max-height: 520px) {
+  body[data-page='overview'] .workspace-lead {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    column-gap: 14px;
   }
-  .atlas-locations {
-    display: contents;
+  body[data-page='overview'] .atlas-map {
+    grid-area: 1 / 1 / 3 / 2;
+    width: min(100%, 76svh, calc(100svh - var(--mast-h) - 14px));
+    align-self: center;
   }
-  .atlas-picker {
-    grid-area: 1 / 2;
-  }
-  .atlas-counts {
-    grid-area: 2 / 1 / 3 / -1;
-    grid-template-columns: 1fr 1fr;
-  }
+  .atlas-intro { grid-area: 1 / 2; }
+  .atlas-foot { grid-area: 2 / 2; align-self: center; }
+  .atlas-card { grid-area: 3 / 1 / 4 / -1; }
+}
+@media (pointer: coarse) and (orientation: landscape) and (min-width: 500px) and (max-width: 639px) and (max-height: 520px) {
+  body[data-page='overview'] .atlas-map { grid-row: 1; }
+  .atlas-intro { grid-template-columns: minmax(0, 1fr); align-self: center; row-gap: 3px; }
+  .atlas-counts > div { display: grid; gap: 1px; }
+  .atlas-picker { grid-area: 3 / 1; width: 100%; }
+  .atlas-foot { grid-area: 2 / 1 / 3 / -1; }
 }
 @media (max-width: 360px) {
+  .atlas-counts b { font-size: 17px; }
   #main-nav {
     gap: 8px;
   }
