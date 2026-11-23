@@ -90,3 +90,9 @@ The replay assumes independent fixed stakes, unlimited funding and execution at 
 | A replay returns no trades | Check the qualifying history, settlement or replay date, entry rules and next-day fill. A time-frame contract may span the dates but have too few observed trading days for the requested average and minimum. |
 
 Run `node --test` from the repository root to check the simulation against fixed price histories. These tests cover entry and exit timing, fees and returns, re-entry, missing days and moving-average coverage. They run offline.
+
+## License
+
+The dashboard’s original code and documentation use the MIT License. You can use, modify and redistribute them, including commercially. Include the copyright and permission notices with copies or substantial portions of the software. [MIT License](LICENSE)
+
+The bundled Montserrat fonts use the SIL Open Font License 1.1. [Montserrat font license](montserrat-license.txt)
