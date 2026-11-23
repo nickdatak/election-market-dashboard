@@ -96,3 +96,7 @@ Run `node --test` from the repository root to check the simulation against fixed
 The dashboard’s original code and documentation use the MIT License. You can use, modify and redistribute them, including commercially. Include the copyright and permission notices with copies or substantial portions of the software. [MIT License](LICENSE)
 
 The bundled Montserrat fonts use the SIL Open Font License 1.1. [Montserrat font license](montserrat-license.txt)
+
+## Author
+
+Built by Nikita Kirillov. [nikitakirillov.com](https://nikitakirillov.com/)
