@@ -1,0 +1,1010 @@
+/* Frosted reading surfaces keep the map visible around dense data. */
+:root {
+  --panel-fill: #1b1e24;
+  --panel-dialog: #252932;
+  --panel-tooltip: #303540;
+  --panel-scrim: rgb(4 4 7 / 70%);
+  --panel-shadow: var(--glass-edge), 0 7px 28px rgb(0 0 0 / 19%);
+  --panel-popup-shadow: var(--glass-edge), 0 16px 52px rgb(0 0 0 / 42%);
+  --panel-text: #eceff5;
+  --panel-soft: var(--muted);
+  --panel-accent: var(--teal);
+  --panel-control: rgb(227 234 249 / 8%);
+  --panel-hover: rgb(227 234 249 / 12%);
+  --panel-selected: rgb(221 219 250 / 19%);
+  --panel-rule: rgb(226 234 249 / 17%);
+  --panel-input-rule: rgb(226 234 249 / 34%);
+  --panel-scrollbar: #65646b;
+  --plot-label: var(--panel-soft);
+  --plot-grid: #505762;
+  --plot-surface: var(--panel-fill);
+  --plot-guide: #c2becd;
+  --plot-series-1: #dac7ff;
+  --plot-series-2: #f4f3ef;
+  --plot-series-3: #b6c8db;
+}
+
+:root[data-theme='light'] {
+  --panel-fill: #fafbfd;
+  --panel-dialog: #fafbfd;
+  --panel-tooltip: #faf9fc;
+  --panel-scrim: rgb(44 42 49 / 27%);
+  --panel-shadow: var(--glass-edge), 0 0 0 1px rgb(54 68 92 / 12%), 0 9px 28px rgb(54 68 92 / 8%);
+  --panel-popup-shadow: var(--glass-edge), 0 0 0 1px rgb(42 57 79 / 16%), 0 16px 52px rgb(42 57 79 / 21%);
+  --panel-text: #262d38;
+  --panel-control: rgb(32 28 42 / 4.5%);
+  --panel-hover: rgb(32 28 42 / 7%);
+  --panel-selected: rgb(80 64 105 / 13%);
+  --panel-rule: rgb(32 28 42 / 12%);
+  --panel-input-rule: rgb(32 28 42 / 29%);
+  --panel-scrollbar: #a09da5;
+  --plot-grid: #c5cbd4;
+  --plot-guide: #756a87;
+  --plot-series-1: #564477;
+  --plot-series-2: #323136;
+  --plot-series-3: #4d657c;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --panel-fill: rgb(27 30 36 / 85%);
+    --panel-dialog: rgb(33 37 45 / 92%);
+  }
+  :root[data-theme='light'] {
+    --panel-fill: rgb(251 252 254 / 84%);
+    --panel-dialog: rgb(251 252 254 / 92%);
+  }
+}
+
+:where(.explorer, #feature, #backtest-view, #detail-dialog, #source-dialog, footer) {
+  font-family: var(--sans);
+  font-weight: 425;
+}
+
+#board-view .explorer,
+#feature,
+#backtest-view {
+  min-width: 0;
+  border: 0;
+  border-radius: 6px;
+  background-color: var(--panel-fill);
+  background-image: var(--glass-sheen);
+  color: var(--panel-text);
+  box-shadow: var(--panel-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+#board-view .explorer,
+#backtest-view {
+  --panel-gutter: clamp(18px, 2.1vw, 32px);
+}
+
+#board-view .explorer .section-heading,
+#backtest-view .section-heading {
+  min-width: 0;
+  gap: 12px;
+}
+
+:is(.explorer, #backtest-view) .section-stroke {
+  display: none;
+}
+
+#board-view .explorer h2,
+#backtest-view .section-heading h2,
+.dialog-frame > h2 {
+  color: var(--ink);
+  font: 440 clamp(24px, 2.1vw, 32px)/1.19 var(--sans);
+  letter-spacing: -0.045em;
+}
+
+/* Explorer and archive */
+#board-view .explorer {
+  margin-top: 24px;
+}
+
+.explorer .section-head {
+  padding: 24px var(--panel-gutter) 17px;
+}
+
+.explorer .section-heading {
+  flex-wrap: wrap;
+}
+
+.explorer-title-group {
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+#explorer-scope-toggle {
+  display: inline-grid;
+  place-items: start center;
+  width: 26px;
+  min-height: 28px;
+  padding: 1px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--panel-accent);
+  font: 500 20px/1 var(--sans);
+  cursor: pointer;
+}
+
+#explorer-scope-toggle:is(:hover, [aria-expanded='true']) {
+  color: var(--ink);
+}
+
+#explorer-scope {
+  max-width: 80ch;
+  margin: 0 var(--panel-gutter) 16px;
+  color: var(--panel-text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.explorer .table-card {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.explorer .mode-badge,
+#backtest-view .count-pill,
+.explorer .country-filter {
+  flex: none;
+  padding: 3px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--panel-soft);
+  font: 500 12px/1.35 var(--sans);
+}
+
+.explorer .mode-badge b {
+  width: 4px;
+  height: 4px;
+  background: var(--panel-accent);
+}
+
+.explorer .country-filter {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  gap: 6px;
+  color: var(--panel-accent);
+}
+
+.explorer .country-filter:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:is(.explorer, #backtest-view) .search-box {
+  min-height: 40px;
+  border: 0;
+  border-bottom: 1px solid var(--panel-input-rule);
+  border-radius: 0;
+  background: var(--panel-control);
+  color: var(--panel-soft);
+}
+
+:is(.explorer, #backtest-view) .search-box input {
+  color: var(--ink);
+  font: 450 13px/1.45 var(--sans);
+}
+
+:is(.explorer, #backtest-view) .search-box input::placeholder {
+  color: var(--panel-soft);
+}
+
+.explorer .table-toolbar {
+  padding: 0 var(--panel-gutter) 12px;
+}
+
+.explorer .venue-filters {
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: 100%;
+}
+
+.explorer .venue-filters button,
+.explorer .venue-filters button[aria-pressed='true'] {
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--panel-soft);
+  font-weight: 485;
+}
+
+.explorer .venue-filters button[aria-pressed='true'] {
+  color: var(--ink);
+  background: var(--panel-selected);
+}
+
+.explorer .venue-filters button:hover:not([aria-pressed='true']),
+.explorer .market-table tbody tr:is(:hover, :focus-within),
+#backtest-view .contract-choice:is(:hover, :focus-within) {
+  background: var(--panel-hover);
+}
+
+.explorer .loaded-count,
+.explorer .table-foot,
+#backtest-view .universe-foot {
+  color: var(--panel-soft);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.explorer .table-foot {
+  padding-inline: var(--panel-gutter);
+}
+
+:is(.explorer, #backtest-view) .table-scroll {
+  position: relative;
+  max-width: 100%;
+  scrollbar-color: var(--panel-scrollbar) transparent;
+  scrollbar-width: thin;
+}
+
+.explorer .market-table th,
+#backtest-view .result-table th {
+  padding-block: 12px;
+  border-block: 0;
+  border-bottom: 1px solid var(--panel-rule);
+  color: var(--panel-soft);
+  background: transparent;
+  font: 580 11px/1.4 var(--sans);
+  letter-spacing: 0.065em;
+}
+
+.explorer .market-table td,
+#backtest-view .result-table td {
+  border-bottom-color: var(--panel-rule);
+  color: var(--panel-text);
+  font-size: 13px;
+}
+
+.market-table th button {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.market-table th button::after { content: '↕' / ''; opacity: .7; }
+.market-table th[aria-sort] button,
+.market-table th button:hover { color: var(--ink); }
+.market-table th[aria-sort='ascending'] button::after { content: '↑' / ''; opacity: 1; }
+.market-table th[aria-sort='descending'] button::after { content: '↓' / ''; opacity: 1; }
+@media (max-width: 720px) {
+  .explorer .table-scroll .market-table {
+    min-width: 690px;
+    table-layout: auto;
+  }
+  .explorer .market-table :is(.volume-col, .date-col) { display: table-cell; }
+}
+
+.explorer .market-table :is(th, td):first-child {
+  padding-left: var(--panel-gutter);
+}
+
+.explorer .market-table td:last-child,
+:is(.explorer, #backtest-view) :is(.market-sub, .subunit) {
+  color: var(--panel-soft);
+}
+
+.explorer .market-link {
+  color: var(--ink);
+  font: 525 14px/1.4 var(--sans);
+  overflow-wrap: anywhere;
+}
+.explorer .market-sub,
+.explorer .venue-tag,
+#backtest-view .choice-title .market-sub {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.explorer .market-link:hover {
+  color: var(--panel-accent);
+}
+
+:is(.explorer, #backtest-view, #detail-dialog) .venue-tag {
+  color: var(--panel-soft);
+}
+
+:is(.explorer, #backtest-view) .number {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.explorer .price-track {
+  height: 2px;
+  border-radius: 0;
+  background: var(--panel-input-rule);
+}
+
+.explorer .price-track b {
+  background: var(--gain);
+}
+
+:is(.explorer, #backtest-view) .result-pill {
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--gain);
+  background: var(--gain-fill);
+  font: 600 12px/1.45 var(--sans);
+}
+
+:is(.explorer, #backtest-view) .result-pill.no {
+  color: var(--loss);
+  background: var(--loss-fill);
+}
+:is(.explorer, .atlas-card, #detail-dialog, #backtest-view) :is(.positive, .outcome-yes) {
+  color: var(--gain);
+}
+:is(.explorer, .atlas-card, #detail-dialog, #backtest-view) :is(.negative, .outcome-no) {
+  color: var(--loss);
+}
+
+:is(.explorer, #backtest-view) .status-line:not(:empty) {
+  border: 0;
+  border-radius: 0;
+  background: var(--panel-control);
+  color: var(--panel-text);
+}
+
+:is(.explorer, #backtest-view, #detail-dialog, #source-dialog, footer) .text-button,
+:is(#detail-dialog, #source-dialog) .dialog-frame a {
+  color: var(--panel-accent);
+  font-weight: 510;
+}
+
+:is(.explorer, #detail-dialog, #source-dialog) .icon-button {
+  width: 31px;
+  height: 31px;
+  border: 0;
+  border-radius: 2px;
+  color: var(--panel-text);
+  background: transparent;
+}
+
+:is(.explorer, #detail-dialog, #source-dialog) .icon-button:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--panel-hover);
+}
+
+/* Settlement controls use the same native inputs in both views. */
+.explorer .table-card > .settlement-filter {
+  margin: -3px var(--panel-gutter) 10px;
+}
+
+.settlement-filter > summary,
+.settlement-filter .settlement-clear {
+  font-weight: 425;
+  color: var(--panel-accent);
+}
+
+.settlement-filter :is(.settlement-summary-state, .settlement-bound) {
+  color: var(--panel-soft);
+  font-weight: 400;
+}
+
+.settlement-filter .settlement-bound input {
+  height: 35px;
+  border: 0;
+  border-bottom: 1px solid var(--panel-input-rule);
+  border-radius: 0;
+  background: var(--panel-control);
+  color: var(--ink);
+  color-scheme: inherit;
+}
+
+.settlement-filter .settlement-bound input:disabled,
+#backtest-view .settlement-bound input:disabled {
+  color: var(--panel-soft);
+  background: var(--panel-control);
+  opacity: 0.65;
+}
+
+.settlement-filter .settlement-bound input[aria-invalid='true'],
+#backtest-view .settlement-bound input[aria-invalid='true'] {
+  border-bottom: 2px dashed var(--panel-accent);
+}
+
+.settlement-filter .settlement-error:not(:empty) {
+  color: var(--panel-accent);
+}
+
+.settlement-filter .settlement-clear[aria-disabled='true'] {
+  color: var(--panel-soft);
+  opacity: 0.65;
+}
+
+:is(.explorer, #backtest-view) input[type='checkbox'] {
+  accent-color: var(--panel-accent);
+}
+
+/* Featured and contract probability charts */
+#feature .feature-info::after {
+  display: none;
+}
+
+#feature .feature-info h2 {
+  color: var(--ink);
+  font: 425 clamp(28px, 2.5vw, 39px)/1.13 var(--sans);
+  letter-spacing: -0.048em;
+  text-wrap: balance;
+}
+
+#feature .feature-kicker,
+.dialog-frame .small-label {
+  color: var(--panel-soft);
+  font: 580 11px/1.4 var(--sans);
+  letter-spacing: 0.13em;
+}
+
+#feature .target-dot {
+  width: 5px;
+  height: 5px;
+  border: 0;
+  background: var(--panel-accent);
+}
+
+#feature .target-dot::after {
+  display: none;
+}
+
+#feature :is(.feature-source, .chart-note, .chart-msg) {
+  color: var(--panel-soft);
+}
+
+#feature .chart-note {
+  font: 460 11px/1.4 var(--sans);
+  letter-spacing: 0.055em;
+}
+
+#feature .feature-plot {
+  border: 0;
+}
+
+#feature .legend-row {
+  color: var(--panel-text);
+  font-size: 13px;
+}
+
+#feature .legend-value {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+
+:is(#feature, #detail-dialog) .legend-dot {
+  width: 14px;
+  height: 0;
+  border-top: 2px solid var(--series);
+  border-radius: 0;
+  background: none;
+}
+
+#feature .legend-row:nth-child(2) .legend-dot,
+:is(#feature, #detail-dialog) .legend-dot[data-pattern='dashed'] {
+  border-top-style: dashed;
+}
+
+#feature .legend-row:nth-child(3) .legend-dot,
+:is(#feature, #detail-dialog) .legend-dot[data-pattern='dotted'] {
+  border-top-style: dotted;
+}
+
+:is(#feature, #detail-dialog) .plot-host path[data-pattern='dashed'] {
+  stroke-dasharray: 6 3;
+}
+
+:is(#feature, #detail-dialog) .plot-host path[data-pattern='dotted'] {
+  stroke-dasharray: 1 3;
+}
+
+:is(#feature, #detail-dialog) .plot-head h3 {
+  font-size: 14px;
+  font-weight: 525;
+}
+
+:is(#feature, #detail-dialog) .range {
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+:is(#feature, #detail-dialog) .range button {
+  min-height: 30px;
+  padding: 4px 8px;
+  border-radius: 2px;
+  color: var(--panel-soft);
+  font-size: 12px;
+  font-weight: 480;
+}
+
+:is(#feature, #detail-dialog) .range button[aria-pressed='true'] {
+  background: var(--panel-selected);
+  color: var(--ink);
+}
+
+:is(#feature, #detail-dialog) .range button:hover:not([aria-pressed='true']) {
+  background: var(--panel-hover);
+  color: var(--ink);
+}
+
+:is(#feature, #detail-dialog) .chart-tip {
+  border: 0;
+  border-radius: 2px;
+  background: var(--panel-tooltip);
+  color: var(--ink);
+  box-shadow: var(--panel-popup-shadow);
+}
+
+:is(#feature, #detail-dialog) .chart-tip strong {
+  color: var(--panel-accent);
+  font-weight: 450;
+}
+
+/* Strategy editor, assignments and results share a continuous surface. */
+#backtest-view .white-card,
+#backtest-view .replay-method {
+  min-width: 0;
+  padding: clamp(18px, 2vw, 28px) var(--panel-gutter);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#backtest-view .test-grid {
+  gap: clamp(4px, 1.4vw, 22px);
+}
+
+#backtest-view .replay-bar {
+  margin-bottom: 4px;
+  padding-block: 18px;
+}
+
+#backtest-view .replay-controls,
+#backtest-view .replay-controls label {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#backtest-view .strategy-editor {
+  --editor-border: var(--panel-input-rule);
+  --editor-green: var(--panel-accent);
+  --editor-tint: var(--panel-hover);
+}
+
+#backtest-view :is(label, summary, strong, .strategy-field-label, .result-subtitle, .strategy-result-name),
+#backtest-view
+  .strategy-editor
+  :is([role='tab'], .strategy-add, .strategy-add-rule, .strategy-rules-head h3, .strategy-sides button) {
+  font-weight: 480;
+}
+
+#backtest-view :is(select, input[type='text'], input[type='date'], .rule-number) {
+  min-width: 0;
+  border: 0;
+  border-bottom: 1px solid var(--panel-input-rule);
+  border-radius: 0;
+  background: var(--panel-control);
+  color: var(--ink);
+  font-weight: 400;
+}
+
+#backtest-view select option {
+  background: var(--panel-dialog);
+  color: var(--ink);
+}
+
+#backtest-view .strategy-match {
+  background: var(--panel-control);
+  border: 0;
+  border-bottom: 1px solid var(--panel-input-rule);
+  border-radius: 0;
+  color: var(--panel-text);
+  font-weight: 425;
+}
+
+#backtest-view .rule-number input {
+  color: var(--ink);
+}
+
+#backtest-view :is(.strategy-switcher, .strategy-rules, .contract-list) {
+  border: 0;
+}
+
+#backtest-view .strategy-tab,
+#backtest-view .strategy-add,
+#backtest-view .strategy-remove-rule,
+#backtest-view .strategy-sides {
+  border: 0;
+  border-radius: 2px;
+  color: var(--panel-text);
+  background: var(--panel-control);
+}
+
+#backtest-view .strategy-tab:has([aria-selected='true']) {
+  background: var(--panel-selected);
+  color: var(--ink);
+}
+
+#backtest-view :is(.strategy-tab-count, .strategy-sides button, .strategy-tab-remove) {
+  border-radius: 2px;
+  color: var(--panel-soft);
+}
+
+#backtest-view .strategy-tab-count,
+#backtest-view [aria-selected='true'] .strategy-tab-count {
+  background: none;
+  color: var(--panel-soft);
+  font-weight: 400;
+}
+
+#backtest-view
+  :is(.strategy-add, .strategy-tab-remove, .strategy-remove-rule, .strategy-sides button):hover:not(
+    :disabled
+  ):not([aria-pressed='true']) {
+  background: var(--panel-hover);
+  color: var(--ink);
+}
+
+#backtest-view .strategy-sides button[data-side='yes'] {
+  color: var(--gain);
+}
+#backtest-view .strategy-sides button[data-side='no'] {
+  color: var(--loss);
+}
+#backtest-view .strategy-sides button[data-side='yes'][aria-pressed='true'] {
+  color: var(--gain);
+  background: var(--gain-fill);
+  box-shadow: inset 0 -2px currentColor;
+}
+#backtest-view .strategy-sides button[data-side='no'][aria-pressed='true'] {
+  color: var(--loss);
+  background: var(--loss-fill);
+  box-shadow: inset 0 -2px currentColor;
+}
+
+#backtest-view .contract-list {
+  scrollbar-color: var(--panel-scrollbar) transparent;
+  scrollbar-width: thin;
+  overscroll-behavior: contain;
+}
+
+#backtest-view .contract-choice {
+  padding: 10px 5px;
+  border-bottom-color: var(--panel-rule);
+}
+
+#backtest-view .contract-choice:has(input:checked) {
+  background: var(--panel-control);
+}
+
+#backtest-view .choice-title {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  font-weight: 510;
+}
+
+#backtest-view :is(.metric, .result-table td).positive,
+#backtest-view .metric .positive {
+  color: var(--gain);
+}
+
+#backtest-view :is(.metric, .result-table td).negative,
+#backtest-view .metric .negative {
+  color: var(--loss);
+}
+
+#backtest-view .result-card {
+  margin-top: 2px;
+}
+
+#backtest-view .result-readout {
+  padding-left: 0;
+  border: 0;
+  color: var(--panel-soft);
+}
+
+#backtest-view .metric,
+.dialog-frame .detail-stat {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 7px 0;
+  background: none;
+}
+
+#backtest-view .metric strong,
+.dialog-frame .detail-stat strong {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+#backtest-view .replay-method {
+  margin: 0;
+  padding-block: 12px;
+  color: var(--panel-text);
+}
+
+#backtest-view .replay-method p {
+  color: var(--panel-soft);
+}
+
+:is(#detail-dialog, #backtest-view) .btn-primary {
+  border: 0;
+  border-radius: 2px;
+  background: var(--panel-text);
+  color: var(--page);
+  font-weight: 450;
+}
+
+:is(#detail-dialog, #backtest-view) .btn-primary:hover:not(:disabled) {
+  background: var(--ink);
+}
+
+/* Dialogs and footer */
+:is(#source-dialog, #detail-dialog) {
+  border: 0;
+  border-radius: 6px;
+  --plot-surface: var(--panel-dialog);
+  background-color: var(--panel-dialog);
+  background-image: var(--glass-sheen);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--ink);
+  box-shadow: var(--panel-popup-shadow);
+  scrollbar-color: var(--panel-scrollbar) transparent;
+  scrollbar-width: thin;
+}
+
+:is(#source-dialog, #detail-dialog)::backdrop {
+  background: var(--panel-scrim);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+.dialog-frame {
+  padding: clamp(18px, 3.1vw, 34px);
+}
+
+.dialog-frame .detail-title {
+  color: var(--ink);
+  font: 440 clamp(26px, 3.1vw, 36px)/1.17 var(--sans);
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.dialog-frame .detail-panel {
+  border: 0;
+  border-top: 1px solid var(--panel-rule);
+  border-radius: 0;
+  background: none;
+  padding: 18px 0 5px;
+}
+.dialog-frame .detail-stat > span,
+.dialog-frame .detail-quote-time,
+.dialog-frame .detail-caption,
+#feature .feature-source {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.dialog-frame .detail-stat strong {
+  font-size: 17px;
+}
+
+.dialog-frame .source-copy h3 {
+  font-weight: 450;
+}
+
+.dialog-frame .source-copy p {
+  color: var(--panel-text);
+}
+
+.dialog-frame .source-dates {
+  border: 0;
+}
+
+footer {
+  border-top: 1px solid var(--panel-rule);
+  background: var(--page);
+  color: var(--panel-soft);
+}
+
+:is(.explorer, #feature, #backtest-view, #detail-dialog, #source-dialog, footer)
+  :is(a, button, select, summary, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--panel-accent);
+  outline-offset: 2px;
+}
+
+:is(.explorer, #backtest-view) :is(.search-box, .rule-number):focus-within {
+  outline: 2px solid var(--panel-accent);
+  outline-offset: 1px;
+}
+
+:is(.explorer, #backtest-view) :is(.search-box, .rule-number) input:focus-visible {
+  outline: none;
+}
+
+#backtest-view .strategy-tab button:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (max-width: 840px) {
+  #backtest-view .test-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .explorer .section-head {
+    align-items: center;
+    padding-block: 16px 12px;
+  }
+
+  .explorer .venue-filters button {
+    padding-inline: 6px;
+  }
+
+  #feature .feature-plot {
+    padding-top: 15px;
+  }
+
+  #backtest-view .portfolio-run {
+    row-gap: 9px;
+  }
+}
+
+@media (max-width: 520px) {
+  #board-view .explorer {
+    margin-top: 16px;
+  }
+
+  .explorer .section-head {
+    gap: 13px;
+  }
+
+  .explorer .section-head > .search-box,
+  .explorer .search-box input {
+    width: 100%;
+  }
+
+  .explorer .table-toolbar {
+    flex-wrap: wrap;
+    gap: 7px;
+    padding-inline: 12px;
+  }
+
+  .explorer .market-table :is(td, th):first-child {
+    padding-left: 12px;
+  }
+
+  .explorer .table-foot {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-inline: 12px;
+  }
+
+  .explorer .paging {
+    margin-left: auto;
+  }
+
+  #backtest-view .strategy > .section-heading {
+    padding-right: 0;
+    min-height: auto;
+  }
+
+  #backtest-view .strategy-switcher {
+    display: flex;
+  }
+
+  #backtest-view .strategy-add {
+    position: static;
+  }
+
+  #backtest-view .strategy .section-heading h2 {
+    font-size: 21px;
+  }
+
+  #backtest-view .test-filter {
+    flex-wrap: wrap;
+  }
+
+  #backtest-view .test-filter .search-box {
+    flex: 1 1 130px;
+  }
+
+  :is(#feature, #detail-dialog) .plot-head {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 420px) {
+  .explorer .venue-filters {
+    gap: 1px;
+  }
+
+  .explorer .venue-filters button,
+  .explorer .venue-filters button[aria-pressed='true'] {
+    padding-inline: 5px;
+    gap: 4px;
+    font-size: 12px;
+  }
+
+  .explorer .venue-filters svg {
+    width: 12px;
+  }
+
+  .explorer .market-table {
+    table-layout: fixed;
+  }
+
+  .explorer .market-table th {
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .explorer .market-table :is(th, td) {
+    padding-inline: 4px;
+  }
+
+  .explorer .market-table th:nth-child(2) {
+    width: 92px;
+  }
+
+  .explorer .market-table th:nth-child(3) {
+    width: 58px;
+  }
+
+  .explorer .market-table th:last-child {
+    width: 20px;
+  }
+
+  .explorer .market-table td:last-child svg {
+    width: 12px;
+  }
+
+  .explorer .market-table .market-sub {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --panel-fill: #1b1e24;
+    --panel-dialog: #252932;
+  }
+  :root[data-theme='light'] {
+    --panel-fill: #fafbfd;
+    --panel-dialog: #fafbfd;
+  }
+  :is(#source-dialog, #detail-dialog)::backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  :is(#backtest-view, .explorer, #feature, #detail-dialog) [aria-pressed='true'],
+  #backtest-view [aria-selected='true'] {
+    outline: 1px solid Highlight;
+    outline-offset: -2px;
+  }
+}

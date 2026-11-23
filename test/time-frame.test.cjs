@@ -1,0 +1,53 @@
+const assert = require('node:assert/strict');
+global.window = {};
+for (const file of ['backtest','discovery','trading']) require('../'+file+'.js');
+const {run,sample,keyFor} = window.ElectionTrading;
+const day = d => Date.UTC(2025,0,d);
+const close = d => day(d)+12*3600000;
+const bar = (d,p) => ({t:close(d)/1000,p});
+const market = (prices, extra={})=>({id:'a',title:'Test race',source:'polymarket',history:prices.map((p,i)=>p==null?null:bar(i+1,p)),...extra});
+const plan = {name:'Threshold',side:'yes',stake:100,buyFrom:-Infinity,buyThrough:Infinity,buy:{basis:'level',direction:'below',amount:25},sell:{basis:'level',direction:'above',amount:60}};
+const settings={start:day(4),end:day(13)-1,days:3,fees:false,liquidate:false};
+const near=(actual,expected)=>assert.ok(Math.abs(actual-expected)<1e-8,actual+' vs '+expected);
+const m=market([.3,.3,.3,.4,.2,.3,.7,.65,.25,.3,.75,.6]);
+const r=run([m],[plan],settings);
+assert.deepEqual(r.trades.map(x=>[x.buySignal,x.enteredAt,x.exitSignal,x.endedAt,x.status]),[
+  [close(5),close(6),close(7),close(8),'Sold'],[close(9),close(10),close(11),close(12),'Sold']]);
+near(r.totals.profit,100*.65/.3-100+100*.6/.3-100);near(r.markedEquity.at(-1).pnl,r.totals.profit);
+near(r.series.get(keyFor(m))[0].average,.3);
+const ma={...plan,name:'Average',buy:{basis:'average',direction:'below',amount:10},sell:{basis:'average',direction:'above',amount:20}};
+const no={...ma,name:'No average',side:'no',buy:{basis:'average',direction:'above',amount:10},sell:{basis:'average',direction:'below',amount:20}};
+const both=run([m],[ma,no],settings);
+for(const s of both.strategies) {
+  assert.equal(s.trades[0].enteredAt,close(6));assert.equal(s.trades[0].endedAt,close(8));
+  near(s.markedEquity.at(-1).pnl,s.totals.profit);
+}
+near(both.strategies[1].trades[0].entryPrice,.7);
+const feesOn=run([m],[plan],{...settings,fees:true});
+assert.ok(feesOn.trades.every(t=>t.entryFee>0&&t.exitFee>0));near(feesOn.totals.profit,r.totals.profit-feesOn.totals.fees);
+near(feesOn.totals.roi,feesOn.totals.profit/(200+feesOn.trades.reduce((sum,t)=>sum+t.entryFee,0)));
+const gap=market([.3,.3,.3,.1,null,.1,.35,.45,null,.45]);
+const g=run([gap],[plan],settings);
+assert.equal(g.trades.length,1);assert.equal(g.trades[0].enteredAt,close(7));assert.equal(g.trades[0].status,'Marked open');assert.equal(g.trades[0].endedAt,close(10));
+assert.equal(g.series.get(keyFor(gap)).find(x=>x.t===close(6)).average,null);
+assert.equal(run([gap],[plan],{...settings,liquidate:true}).trades[0].status,'Marked open');
+assert.equal(run([gap],[plan],{...settings,liquidate:true,end:day(11)-1}).trades[0].status,'Window sale');
+const delayed={...gap,outcome:1,settledAt:new Date(day(11)).toISOString()};
+const before=run([delayed],[plan],{...settings,end:day(11)-1});
+assert.equal(before.trades[0].status,'Marked open');
+const settled=run([delayed],[plan],{...settings,fees:true});
+assert.equal(settled.trades[0].status,'Settled');assert.equal(settled.trades[0].exitPrice,1);assert.equal(settled.trades[0].exitFee,0);
+assert.equal(run([m],[{...plan,buyFrom:day(5),buyThrough:day(6)-1}],settings).trades.length,0);
+const change=run([m],[{...plan,buy:{basis:'change',direction:'below',amount:20}}],settings);assert.equal(change.trades[0].enteredAt,close(6));
+const noFuture=run([market([.3,.3,.3,.4,.2,.3,.7,.65,.25,1,1,1])],[ma],settings);
+assert.deepEqual(noFuture.trades[0],{...both.strategies[0].trades[0],market:noFuture.trades[0].market});
+const picks=[m,{...m,id:'b'},{...m,id:'c'},m];
+assert.equal(sample(picks,9).length,3);assert.equal(new Set(sample(picks,3).map(keyFor)).size,3);
+assert.deepEqual(sample(picks,2,()=>0).map(x=>x.id),['a','b']);assert.deepEqual(sample(picks,2,()=>.99).map(x=>x.id),['c','a']);
+assert.equal(picks.length,4);
+const providers=[{...m,id:'old',openedAt:'2020-01-01',settledAt:'2024-01-04',outcome:1},{...m,id:'long',openedAt:'2024-01-01',closeAt:'2025-09-01',settledAt:'2025-10-01',outcome:1},{...m,id:'new',openedAt:'2025-03-01',settledAt:'2025-10-01',outcome:1}];
+window.ElectionPolymarket={async discoverPage(){return {markets:providers,nextCursor:null}}};
+window.ElectionDiscovery.fetch({mode:'archive',source:'polymarket',count:500,newest:true,electionIndex:true,tradingFrom:'2025-01-01',tradingThrough:'2025-02-28'}).then(discovered=>{
+  assert.deepEqual(discovered.markets.map(x=>x.id),['long']);
+  console.log('Verified round trips, re-entry, both sides, causal averages, gaps, limits, fees, settlement, marks, sampling and window overlap.');
+}).catch(e=>{console.error(e);process.exitCode=1});

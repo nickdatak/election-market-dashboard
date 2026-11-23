@@ -1,0 +1,48 @@
+const assert = require('node:assert/strict');
+global.window = {};
+for (const name of ['backtest','discovery','trading','polymarket']) require('../' + name + '.js');
+const D = 86400000, day = n => Date.UTC(2025,0,n);
+const settings = {start:day(4),end:day(10)-1,days:3,minDays:6};
+const bars = [...Array(9)].map((_,i)=>({t:(day(i+1)+D/2)/1000,p:[.1,.2,.3,.35,.25,.45,.65,.75,.6][i]}));
+const m = {source:'polymarket',id:'full',history:bars};
+const {inspectHistory,run,keyFor} = window.ElectionTrading;
+const report = (rows, changes={})=>inspectHistory({...m,...changes},rows,settings);
+const scope = {start:settings.start,end:settings.end,days:3};
+assert.deepEqual(report([...bars].reverse()),{days:6,from:day(4),through:day(9)});
+assert.equal(report(bars.slice(1)).days,5,'warm-up precedes the counted trading stretch');
+assert.equal(report(bars.filter((_,i)=>i!==5)).days,2,'a missing day resets the average and the streak');
+assert.equal(report(bars.map((p,i)=>i===5?{...p,p:0}:p)).days,3,'a terminal price is not a tradable close');
+assert.equal(report([...bars,{t:(day(4)+D-1000)/1000,p:1}]).days,5,'the last observation determines the day');
+assert.equal(report(bars,{tradingClosedAt:new Date(day(9)).toISOString()}).days,5);
+assert.equal(report(bars,{openedAt:new Date(day(1)+D*.75).toISOString()}).days,5);
+assert.equal(report([...bars.slice(0,5),...bars,...bars]).days,6,'duplicates never add trading days');
+const possible=window.ElectionDiscovery.possiblePriceDays;
+assert.equal(possible({openAt:new Date(day(1)+D/2).toISOString(),closeAt:new Date(day(10)).toISOString()},scope.start,scope.end,3),6);
+assert.equal(possible({openAt:new Date(day(2)).toISOString()},scope.start,scope.end,3),5);
+assert.equal(possible({closeAt:new Date(day(9)).toISOString()},scope.start,scope.end,3),5);
+assert.equal(possible({},scope.start,scope.end,3),6,'missing metadata can be checked against actual prices');
+const plan={name:'Round trip',side:'yes',stake:45,buy:{basis:'level',direction:'below',amount:25},sell:{basis:'level',direction:'above',amount:60}};
+const bad={...m,id:'gap',history:bars.filter((_,i)=>i!==5)};
+const result=run([m,bad],[plan],settings);
+assert.equal(result.series.size,1);assert.equal(result.rejected[0].market.id,'gap');assert.equal(result.rejected[0].coverage.days,2);
+assert.equal(result.trades.length,1);assert.equal(result.trades[0].enteredAt,day(6)+D/2);assert.equal(result.trades[0].endedAt,day(8)+D/2);
+assert.equal(result.totals.profit,30);assert.ok(Math.abs(result.series.get(keyFor(m))[0].average-.2)<1e-12);
+for(const badMin of [0,2,7,NaN,3.5])assert.throws(()=>run([m],[plan],{...settings,minDays:badMin}));
+
+(async()=>{
+  const seconds=n=>day(n)/1000;
+  const first=seconds(1), last=seconds(31)-1, requests=[];
+  window.ElectionAPI = {async json(url){
+    const params=new URL(url).searchParams;
+    const lo=Number(params.get('startTs')),hi=Number(params.get('endTs'));
+    requests.push([lo,hi]);assert.equal(params.get('fidelity'),'60');
+    const h=[];
+    for(let t=lo;t<=hi;t+=3600)if(t<seconds(6)||t>=seconds(7))h.push({t,p:t%86400===23*3600?.7:.4});
+    return {history:h.reverse().concat([{t:hi+1,p:1}])};
+  }};
+  const observations=await window.ElectionPolymarket.history({tokenId:'1'},{start:first,end:last,daily:true,utcCloses:true});
+  assert.deepEqual(requests,[[first,seconds(15)-1],[seconds(15),seconds(29)-1],[seconds(29),last]]);
+  assert.equal(observations.length,29);assert.ok(observations.every(o=>o.p===.7));
+  assert.ok(observations.every(o=>o.t<seconds(6)||o.t>=seconds(7)),'no invented observations');
+  console.log('Verified full-window and shorter histories, warm-up, gaps, boundaries, hourly UTC closes, invalid thresholds and exact P&L.');
+})().catch(e=>{console.error(e);process.exitCode=1});

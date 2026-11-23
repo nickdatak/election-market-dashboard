@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#030303" />
+    <meta name="election-api" content="direct" />
+    <title>Election atlas</title>
+    <script src="theme.js"></script>
+    <link rel="icon" href="data:," />
+    <link rel="preload" href="montserrat-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="montserrat.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="strategies.css" />
+    <link rel="stylesheet" href="settlement-filter.css" />
+    <link rel="stylesheet" href="atlas.css" />
+    <link rel="stylesheet" href="space-panels.css" />
+    <link rel="stylesheet" href="backtest-charts.css" />
+    <link rel="stylesheet" href="contract-fetch.css" />
+    <script defer src="api.js"></script>
+    <script defer src="kalshi.js"></script>
+    <script defer src="polymarket.js"></script>
+    <script defer src="backtest.js"></script>
+    <link rel="stylesheet" href="trading.css" />
+    <script defer src="trading.js"></script>
+    <script defer src="trading-ui.js"></script>
+    <script defer src="strategies.js"></script>
+    <script defer src="settlement-filter.js"></script>
+    <script defer src="discovery.js"></script>
+    <script defer src="contract-fetch.js"></script>
+    <script defer src="backtest-charts.js"></script>
+    <script defer src="backtest-ui.js"></script>
+    <script defer src="snapshot.js"></script>
+    <script defer src="kalshi-snapshot.js"></script>
+    <script defer src="chart.js"></script>
+    <script defer src="countries.js"></script>
+    <script defer src="market-geography.js"></script>
+    <script defer src="globe.js"></script>
+    <script defer src="atlas.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body data-page="overview">
+    <!-- Kalshi's published wordmark, from the header artwork at docs.kalshi.com. -->
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+      <symbol id="kalshi-wordmark" viewBox="0 0 300 88">
+        <path d="M0 86.6812H21.1013V1.31879H0V86.6812ZM44.7347 86.6812H69.8151L36.7765 34.6485L36.4148 47.4768L68.9711 1.31879H46.4228L18.8103 41.9618L18.9309 43.8801L44.7347 86.6812ZM89.2283 88C97.6688 88 104.059 85.0027 108.039 79.248V86.6812H126.849V45.9183C126.849 30.5722 117.564 22.6594 99.3569 22.6594C81.873 22.6594 71.2621 30.5722 70.418 44.3597H88.6254C89.3489 39.0845 92.7251 36.327 98.6334 36.327C104.421 36.327 107.797 38.9646 107.677 43.1608C107.556 46.3978 105.506 47.8365 100.322 48.5559L92.8457 49.515C75.9646 51.5531 68.0064 57.9074 68.0064 69.297C68.0064 80.9264 75.9646 88 89.2283 88ZM95.3778 74.9319C89.9518 74.9319 86.9373 72.5341 86.9373 68.0981C86.9373 63.9019 89.59 61.8638 96.9453 60.7847L100.322 60.3052C108.883 59.1063 113.103 56.4687 115.394 50.8338L107.797 51.5531V64.7411C107.797 70.7357 102.733 74.9319 95.3778 74.9319ZM133.481 86.6812H152.773V1.31879H133.481V86.6812ZM184.486 88C201.487 88 211.736 81.1662 211.736 67.139C211.736 53.7112 203.296 49.515 186.777 47.2371C178.215 46.0381 175.322 44.7193 175.322 41.1226C175.322 37.8856 178.215 35.4877 183.4 35.4877C188.947 35.4877 191.6 37.7657 192.444 42.3215H209.928C208.481 27.8147 197.87 22.6594 183.28 22.6594C169.654 22.6594 157.476 29.2534 157.476 42.5613C157.476 55.1499 164.228 60.0654 180.989 62.3433C189.791 63.6621 193.288 65.3406 193.288 69.0572C193.288 72.6539 190.394 75.0518 184.365 75.0518C177.371 75.0518 174.96 72.1744 174.236 67.0191H156.391C156.994 80.5668 167.122 88 184.486 88ZM215.233 86.6812H234.526V49.6349C234.526 42.0817 238.746 38.2452 244.775 38.2452C250.804 38.2452 253.577 41.7221 253.577 48.436V86.6812H272.87V45.079C272.87 29.9727 264.791 22.6594 253.215 22.6594C241.519 22.6594 234.405 30.0926 232.838 38.2452L234.526 39.6839V1.31879H215.233V86.6812ZM279.502 86.6812H298.794V23.9782H279.502V86.6812ZM278.296 10.1907C278.296 15.8256 282.998 20.3815 289.148 20.3815C295.177 20.3815 300 15.8256 300 10.1907C300 4.67574 295.297 -7.62939e-06 289.148 -7.62939e-06C283.119 -7.62939e-06 278.296 4.67574 278.296 10.1907Z" />
+      </symbol>
+    </svg>
+    <div class="space-scene" id="space-scene">
+      <div class="atlas-map" id="atlas-map">
+        <canvas
+          id="atlas-canvas"
+          role="img"
+          tabindex="0"
+          aria-label="Interactive globe of election markets. Drag or use the arrow keys to rotate. Use Find a country to select a location."
+          >Use Find a country to explore election markets.</canvas
+        >
+        <div id="atlas-callouts" class="atlas-callouts" aria-hidden="true"></div>
+        <div class="atlas-hover-label" id="atlas-tip" aria-hidden="true" hidden></div>
+        <div id="atlas-fallback" hidden>Choose a country to explore its markets.</div>
+      </div>
+    </div>
+    <header class="mast">
+      <div class="mast-inner">
+        <nav id="main-nav" aria-label="Main navigation">
+          <a href="#overview" data-page="overview" aria-current="page"
+            ><span data-icon="globe"></span>Atlas</a
+          >
+          <a href="#archive" data-page="archive"><span data-icon="archive"></span>Archive</a>
+          <a href="#backtest" data-page="backtest"><span data-icon="backtest"></span>Backtest</a>
+        </nav>
+        <div class="freshness" id="freshness" aria-live="polite"></div>
+        <div class="mast-actions">
+          <button class="source-button" id="sources-button" aria-label="Data sources" title="Data sources">
+            <span data-icon="database"></span><span class="source-text">Data sources</span>
+          </button>
+          <button
+            id="theme-toggle"
+            type="button"
+            aria-label="Light mode"
+            aria-pressed="false"
+            title="Switch to light mode"
+          >
+            <span class="theme-sun" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              >
+                <circle cx="12" cy="12" r="3.6" />
+                <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+              </svg>
+            </span>
+            <span class="theme-moon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+              >
+                <path d="M20.5 15a9 9 0 0 1-11.6-11.5A9.1 9.1 0 1 0 20.5 15Z" />
+              </svg>
+            </span>
+          </button>
+          <button id="refresh-button" class="btn-primary">
+            <span data-icon="refresh"></span><span id="refresh-label">Fetch all live</span>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main class="wrap">
+      <div class="workspace-lead">
+        <div class="page-head" id="route-intro" hidden>
+          <h1 id="page-title"></h1>
+          <p id="page-description"></p>
+        </div>
+        <section id="atlas" class="atlas" aria-labelledby="atlas-title">
+          <div class="atlas-scene">
+            <div class="atlas-intro floating-panel">
+              <div class="atlas-panel-heading">
+                <h1 id="atlas-title">Global coverage</h1>
+              </div>
+              <div class="atlas-locations">
+                <div class="atlas-counts">
+                  <div><b id="atlas-location-count">—</b><span>Countries</span></div>
+                  <div><b id="atlas-market-count">—</b><span>Mapped contracts</span></div>
+                </div>
+                <label class="sr-only" for="atlas-country">Find a country</label>
+                <div class="atlas-picker">
+                  <span data-icon="search"></span>
+                  <select id="atlas-country">
+                    <option value="">Find a country</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <aside class="atlas-card floating-panel" id="atlas-card" aria-label="Country market overlay">
+              <div class="atlas-card-meta">
+                <span class="atlas-card-label"
+                  ><i></i><span id="atlas-card-state">Country preview</span></span
+                >
+                <button id="atlas-unpin" aria-label="Unpin country" title="Unpin country" hidden>
+                  <span data-icon="x"></span>
+                </button>
+              </div>
+              <div class="atlas-country-heading">
+                <div>
+                  <h3 id="atlas-country-name">Country details</h3>
+                  <p id="atlas-country-summary"></p>
+                </div>
+                <canvas
+                  class="country-shape"
+                  id="country-shape"
+                  width="132"
+                  height="84"
+                  aria-hidden="true"
+                ></canvas>
+              </div>
+              <div class="atlas-contracts" id="atlas-contracts"></div>
+              <button type="button" id="atlas-open-country" class="atlas-link">
+                Explore contracts <span data-icon="right"></span>
+              </button>
+            </aside>
+          </div>
+          <div class="atlas-foot">
+            <div class="atlas-key"><i></i> Active election markets</div>
+            <div class="atlas-navigation">
+              <span class="atlas-drag"
+                ><span data-icon="move"></span><span class="atlas-desktop-copy">Drag to rotate</span
+                ><span class="atlas-touch-copy">Swipe to rotate</span></span
+              >
+              <button id="atlas-west" type="button" aria-label="Rotate globe west" title="Rotate west">
+                <span data-icon="left"></span>
+              </button>
+              <button id="atlas-east" type="button" aria-label="Rotate globe east" title="Rotate east">
+                <span data-icon="right"></span>
+              </button>
+              <button id="atlas-reset" type="button" aria-label="Reset globe view" title="Reset view">
+                <span data-icon="reset"></span>
+              </button>
+            </div>
+            <button type="button" class="atlas-more" id="atlas-more">
+              <span data-icon="plus"></span><span>Fetch all live contracts</span>
+            </button>
+          </div>
+          <p class="atlas-status" id="atlas-status" aria-live="polite" hidden></p>
+          <span id="atlas-announce" class="sr-only" aria-live="polite"></span>
+        </section>
+      </div>
+      <div id="board-view">
+        <section class="explorer" aria-labelledby="explorer-title">
+          <div class="section-head">
+            <div class="section-heading">
+              <span class="section-stroke"></span>
+              <div class="explorer-title-group">
+                <h2 id="explorer-title">Market explorer</h2>
+                <button type="button" id="explorer-scope-toggle" aria-label="Which contracts are included?"
+                  title="Which contracts are included?" aria-expanded="false" aria-controls="explorer-scope">*</button>
+              </div>
+              <span id="mode-badge" class="mode-badge"><b></b>Active</span>
+              <button id="country-filter" class="country-filter" type="button" hidden>
+                <span></span><span data-icon="x"></span>
+              </button>
+            </div>
+            <label class="search-box"
+              ><span data-icon="search"></span
+              ><input
+                id="search"
+                type="search"
+                placeholder="Search loaded markets"
+                aria-label="Search loaded markets"
+            /></label>
+          </div>
+          <p id="explorer-scope" hidden>
+            <span aria-hidden="true">*</span> Explorer shows Yes/No contracts from Kalshi’s Elections category
+            and Polymarket’s Elections tag. These include presidential and local races, party leadership contests,
+            and referendums. A single race can have a separate contract for each candidate.
+          </p>
+          <div class="table-card">
+            <div class="table-toolbar">
+              <div class="venue-filters" id="venue-filters" aria-label="Filter by exchange"></div>
+              <span class="loaded-count" id="loaded-count"></span>
+            </div>
+            <details id="live-options">
+              <summary>Live fetch options</summary>
+              <form id="live-fetch" class="contract-fetch-form"></form>
+              <button type="button" class="text-button" id="show-live-library" hidden>Show all loaded contracts</button>
+            </details>
+            <details id="board-settlement"></details>
+            <div id="catalog-status" class="status-line" aria-live="polite"></div>
+            <div class="table-scroll">
+              <table class="market-table">
+                <thead id="market-head">
+                  <tr>
+                    <th scope="col"><button type="button" data-sort="name">Election / outcome</button></th>
+                    <th scope="col"><button type="button" data-sort="source">Exchange</button></th>
+                    <th scope="col"><button type="button" data-sort="value">Yes price</button></th>
+                    <th scope="col" class="volume-col" aria-sort="descending"><button type="button" data-sort="volume" title="Reported lifetime volume. Kalshi uses contracts traded and Polymarket uses US dollars.">Volume</button></th>
+                    <th scope="col" class="date-col"><button type="button" data-sort="date">Settlement (UTC)</button></th>
+                    <th scope="col"><span class="sr-only">Details</span></th>
+                  </tr>
+                </thead>
+                <tbody id="market-rows"></tbody>
+              </table>
+            </div>
+            <div id="board-empty" class="empty" hidden></div>
+            <div class="table-foot">
+              <span id="row-range"></span>
+              <div class="paging">
+                <button class="text-button" id="fetch-more"><span id="fetch-more-label">Fetch options</span> <span data-icon="plus"></span></button
+                ><button class="icon-button" id="previous" aria-label="Previous page">
+                  <span data-icon="left"></span></button
+                ><button class="icon-button" id="next" aria-label="Next page">
+                  <span data-icon="right"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="feature" class="feature" aria-label="Featured election market">
+          <div class="feature-info">
+            <div class="feature-kicker"><span class="target-dot"></span>Featured race</div>
+            <h2 id="feature-title">Presidential election</h2>
+            <div class="feature-source">
+              <span class="venue-icon polymarket" data-icon="poly"></span>Polymarket <span class="mid-dot">·</span> Winner market
+            </div>
+            <div id="feature-legend" class="feature-legend"></div>
+          </div>
+          <div class="feature-plot">
+            <div class="plot-head">
+              <h3>Implied probability</h3>
+              <div class="range" id="feature-ranges" aria-label="Featured chart period"></div>
+            </div>
+            <div
+              class="plot-host dark-chart"
+              id="feature-chart"
+              role="group"
+              aria-label="Featured race price history"
+            ></div>
+            <div id="feature-note" class="chart-note" aria-live="polite"></div>
+          </div>
+        </section>
+      </div>
+      <section id="backtest-view" hidden>
+        <nav class="backtest-sections" aria-label="Backtest sections">
+          <a id="section-portfolio" href="#backtest" aria-current="page">Strategy comparison</a>
+          <a id="section-trading" href="#backtest-trading">Time-frame trading</a>
+        </nav>
+        <div id="portfolio-replay">
+        <div class="replay-bar white-card">
+          <div class="replay-controls">
+            <label
+              >Replay mode
+              <select id="test-mode" form="strategy-form">
+                <option value="archive">Settled contracts</option>
+                <option value="live">Active contracts</option>
+              </select>
+            </label>
+            <label id="test-date-field" hidden
+              >Replay through (UTC)
+              <input type="date" id="test-asof" form="strategy-form" />
+            </label>
+            <label class="fee-control"><input type="checkbox" id="test-fees" checked /> Estimate trading fees</label>
+          </div>
+          <div class="portfolio-run">
+            <span id="portfolio-count"></span>
+            <button class="text-button" id="cancel-run" type="button" hidden>Cancel run</button>
+            <button class="btn-primary" id="run-button" type="submit" form="strategy-form">
+              <span data-icon="play"></span><span>Run all strategies</span>
+            </button>
+          </div>
+        </div>
+        <section class="white-card discovery-panel" aria-labelledby="discovery-heading">
+          <div class="section-heading"><h2 id="discovery-heading">Fetch contracts</h2></div>
+          <form id="contract-fetch" class="contract-fetch-form"></form>
+          <template id="contract-fetch-template">
+            <fieldset class="fetch-fields" id="fetch-fields">
+              <label>Maximum contracts
+                <input type="number" id="fetch-count" min="1" step="1" required value="500" inputmode="numeric" />
+              </label>
+              <label>Exchange
+                <select id="fetch-source">
+                  <option value="all">Both exchanges</option>
+                  <option value="kalshi">Kalshi</option>
+                  <option value="polymarket">Polymarket</option>
+                </select>
+              </label>
+              <label>Settlement from
+                <input type="date" id="fetch-from" aria-describedby="fetch-date-note" />
+              </label>
+              <label>Settlement through
+                <input type="date" id="fetch-to" aria-describedby="fetch-date-note" />
+              </label>
+              <label class="fetch-inclusion">Election country
+                <select id="fetch-include-country"><option value="">All countries</option></select>
+              </label>
+              <label>Exclude countries
+                <select id="fetch-country" aria-describedby="fetch-country-note"><option value="">Add country…</option></select>
+              </label>
+              <label class="fetch-recency">Rank recent contracts by
+                <select id="fetch-recency"><option value="election">Election listing</option><option value="contract">Individual contract listing</option></select>
+              </label>
+              <label class="fetch-query">Contract text
+                <input type="search" id="fetch-query" placeholder="Any election" />
+              </label>
+            </fieldset>
+            <div id="fetch-exclusions" class="fetch-exclusions" aria-label="Excluded countries"></div>
+            <p class="fetch-note" id="fetch-date-note"></p>
+            <p class="fetch-note" id="fetch-country-note" hidden>Country exclusions also skip contracts with an unidentified country.</p>
+            <div class="fetch-actions">
+              <label class="fetch-assign"><input type="checkbox" id="fetch-assign" checked />
+                <span>Assign fetched contracts to every strategy</span>
+              </label>
+              <button class="btn-primary" id="fetch-submit" type="submit">Fetch and assign</button>
+              <button class="text-button" id="fetch-cancel" type="button" hidden>Cancel fetch</button>
+            </div>
+            <p class="fetch-status" id="fetch-status" role="status"></p>
+          </template>
+        </section>
+        <div class="test-grid">
+          <section class="white-card strategy">
+            <div class="section-heading">
+              <span class="section-stroke"></span>
+              <h2>Strategy builder</h2>
+            </div>
+            <form id="strategy-form" novalidate>
+              <div id="strategy-editor"></div>
+            </form>
+          </section>
+          <section class="white-card universe">
+            <div class="section-head">
+              <div class="section-heading"><h2>Contract assignments</h2></div>
+              <span class="count-pill" id="selection-count">0 selected</span>
+            </div>
+            <p id="selection-description"></p>
+            <div class="test-filter">
+              <label class="search-box"
+                ><span data-icon="search"></span
+                ><input
+                  type="search"
+                  id="test-search"
+                  placeholder="Find a contract"
+                  aria-label="Find a contract" /></label
+              ><select id="test-source" aria-label="Filter contracts by exchange">
+                <option value="all">Both exchanges</option>
+                <option value="kalshi">Kalshi</option>
+                <option value="polymarket">Polymarket</option>
+              </select>
+            </div>
+            <details id="picker-settlement"></details>
+            <div id="contract-list" class="contract-list"></div>
+            <div class="picker-pages" id="picker-pages" hidden>
+              <button type="button" class="text-button" id="picker-prev">Previous</button>
+              <span id="picker-range"></span>
+              <button type="button" class="text-button" id="picker-next">Next</button>
+            </div>
+            <div class="universe-foot">
+              <span id="test-catalog-status" aria-live="polite"></span>
+              <div class="assignment-actions">
+                <button type="button" class="text-button" id="assign-shown">Select all shown</button>
+                <button type="button" class="text-button" id="clear-selection">Clear selection</button>
+                <button type="button" class="text-button" id="use-loaded" hidden>Show all loaded</button>
+              </div>
+            </div>
+          </section>
+        </div>
+        <section class="white-card result-card" id="results" aria-live="polite">
+          <div class="section-heading">
+            <span class="section-stroke"></span>
+            <h2>Backtest results</h2>
+          </div>
+          <div id="test-output" class="result-body"></div>
+        </section>
+        <details class="replay-method white-card" open>
+          <summary>Backtest assumptions &amp; fees</summary>
+          <div class="method-grid">
+            <div><h3>Contract selection</h3>
+              <p>Fetch selects binary contracts matching your exchange, country, text and settlement filters. Election listing uses the exchanges’ newest election indexes. Kalshi uses the election’s opening time and checks both active and inactive groups in a settled search. Polymarket uses the election’s creation time. New contracts added to an older election share its rank. Choose Individual contract listing to rank strictly by each contract’s own creation time, which can require more pages. The limit is shared across exchanges and defaults to 500. Both feeds page backward and stop at the cutoff for the chosen ranking. If fewer contracts qualify, the exact available count is shown after both sources finish. A partial result identifies an interrupted source.</p>
+              <p>Each row is one exchange contract. One election can have many contracts. Assignments are sorted by reported lifetime volume, highest first. Kalshi reports contracts traded and Polymarket reports dollars traded. Missing volume sorts last. Volume is for display and does not enter the trading signal.</p>
+            </div>
+            <div><h3>Signals &amp; fills</h3>
+              <p id="method-text"></p>
+              <p>Rules use the chosen side’s last observed price each UTC day. No is estimated as 100% minus Yes. Crossings and daily moves compare consecutive days. A buy or sell signal fills at the following UTC day’s last price if it is strictly between 0% and 100%. If that fill is missing, the replay looks for a fresh signal.</p>
+              <p>Exit rules start on the entry fill day. Gain and loss thresholds measure percentage points from the actual entry price. An unfilled exit leaves the position open for settlement or the live replay mark. Each strategy enters a contract once.</p>
+            </div>
+            <div><h3>Stake &amp; returns</h3>
+              <p>All strategies share the same price history and run on one timeline. Each can enter one position per assigned contract. Fractional shares equal stake divided by entry price. Stakes may overlap, with unlimited funding and no compounding, spread, slippage or liquidity constraint.</p>
+              <p>Net P&amp;L equals sale proceeds, payout or marked value minus stake and trading fees. Return divides net P&amp;L by stake plus entry fees. An early sale counts as a win if its net P&amp;L is positive. A settled position wins when its side pays out. Portfolio P&amp;L sums the strategies, including separate positions in a shared contract. Sales and settlements release the stake. Volume and sample membership reflect the fetched data and can introduce selection bias.</p>
+            </div>
+            <div><h3>Trading fees</h3>
+              <p>With estimates on, each buy and sale incurs a taker fee at its fill price. Settlement and open marks carry no exit fee. For C shares at price p (0–1), the Kalshi estimate is 0.07 × series multiplier × C × p × (1 − p). Cash debits round up and sale credits round down to $0.0001. The model uses an event override when supplied, otherwise the series multiplier or the standard value of 1. A published fee waiver applies through its expiry. Polymarket uses rate × C × p × (1 − p), rounded to five decimal places. Fee-disabled markets pay zero.</p>
+              <p>For 100 shares at 50¢, the standard estimate per fill is $1.75 on Kalshi and $1.25 on a fee-enabled Polymarket election. The model uses available market metadata and standard rates where missing (0.05 for Polymarket elections). Historical rate changes and rebates are excluded. Turn estimates off to compare gross returns.
+                <a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">Kalshi fee schedule</a> · <a href="https://docs.polymarket.com/trading/fees" target="_blank" rel="noopener">Polymarket fees</a></p>
+            </div>
+          </div>
+        </details>
+        </div>
+        <section id="trading-replay" hidden aria-label="Time-frame trading">
+          <form id="tw-discovery" class="white-card tw-block">
+            <div class="section-heading"><h2>Trading window</h2></div>
+            <div class="tw-fields">
+              <label>From (UTC)<input id="tw-from" type="date" required></label>
+              <label>Through (UTC)<input id="tw-to" type="date" required></label>
+              <label>Minimum consecutive days<input id="tw-min-days" type="number" min="3" step="1" placeholder="Entire window" aria-describedby="tw-history-rule"></label>
+              <label>Moving average (days)<input type="number" id="tw-days" min="1" max="90" step="1" value="7" required aria-describedby="tw-history-rule"></label>
+              <label>Market status<select id="tw-status"><option value="both">Both</option><option value="archive">Settled</option><option value="live">Active</option></select></label>
+              <label>Exchange<select id="tw-source"><option value="all">Both</option><option value="kalshi">Kalshi</option><option value="polymarket">Polymarket</option></select></label>
+              <label>Election country<select id="tw-country"><option value="">All countries</option></select></label>
+              <label>Contract name or ID<input id="tw-query" type="search" placeholder="Any election"></label>
+              <label>Selection method<select id="tw-method"><option value="random">Random sample</option><option value="manual">Choose specific contracts</option></select></label>
+              <label><span id="tw-size-label">Sample size</span><input id="tw-size" type="number" min="1" max="500" step="1" value="10" required></label>
+            </div>
+            <p id="tw-history-rule" class="tw-note"></p>
+            <div class="tw-actions">
+              <button id="tw-fetch" class="btn-primary" type="submit">Fetch random sample</button>
+              <button id="tw-redraw" class="text-button" type="button" hidden>Draw again</button>
+              <button id="tw-cancel-fetch" class="text-button" type="button" hidden>Cancel fetch</button>
+            </div>
+            <p class="fetch-status" id="tw-fetch-note" role="status"></p>
+          </form>
+          <section class="white-card tw-block" aria-label="Trading contract selection">
+            <div class="section-head"><div class="section-heading"><h2>Contracts</h2></div><span id="tw-selected" class="count-pill">0 selected</span></div>
+            <div class="tw-picker-tools">
+              <input id="tw-find" type="search" placeholder="Find a loaded contract" aria-label="Find a loaded contract">
+              <label><input id="tw-picked-only" type="checkbox"> Selected only</label>
+              <button id="tw-clear" class="text-button" type="button" disabled>Clear selection</button>
+            </div>
+            <div id="tw-list" class="contract-list"></div>
+            <p id="tw-pool-note" class="tw-note"></p>
+          </section>
+          <form id="tw-rules" class="white-card tw-block">
+            <div class="section-head"><div class="section-heading"><h2>Buy and sell rules</h2></div>
+              <button id="tw-add-rule" class="text-button" type="button">+ Add strategy</button>
+            </div>
+            <div id="tw-strategies"></div>
+            <div class="tw-fields tw-settings">
+              <label>At the end of the window<select id="tw-end-mode"><option value="mark">Mark remaining positions</option><option value="sell">Sell on the final day</option></select></label>
+              <label class="tw-check"><input id="tw-fees" type="checkbox" checked> Estimate buy and sell fees</label>
+            </div>
+            <div class="tw-actions">
+              <button id="tw-run" class="btn-primary" type="submit" disabled>Run trading backtest</button>
+              <button id="tw-preview" class="text-button" type="button" disabled>Plot prices &amp; averages</button>
+              <button id="tw-stop" class="text-button" type="button" hidden>Cancel run</button>
+              <span id="tw-run-note" role="status" class="tw-note"></span>
+            </div>
+          </form>
+          <template id="tw-plan-template">
+            <fieldset class="tw-plan">
+              <legend class="sr-only"></legend>
+              <div class="tw-plan-head">
+                <label>Strategy name<input data-field="name" type="text" maxlength="60" required></label>
+                <label>Buy side<select data-field="side"><option value="yes">Yes</option><option value="no">No</option></select></label>
+                <label>Stake per entry ($)<input data-field="stake" type="number" min="0.01" max="100000000" step=".01" value="100" required></label>
+                <button class="text-button tw-remove" type="button" title="Remove strategy">×</button>
+              </div>
+              <div class="tw-signals"></div>
+              <details class="tw-buy-dates"><summary>Limit buy dates</summary>
+                <div class="tw-fields">
+                  <label>Buy from (UTC)<input type="date" data-field="buy-from"></label>
+                  <label>Buy through (UTC)<input type="date" data-field="buy-to"></label>
+                </div>
+              </details>
+            </fieldset>
+          </template>
+          <section id="tw-results" class="white-card tw-block" hidden>
+            <div class="section-heading"><h2 id="tw-result-title">Trading results</h2></div>
+            <div id="tw-summary"></div>
+            <div class="tw-price-panel">
+              <div class="section-head"><h3>Outcome prices &amp; averages</h3>
+                <label>Contract<select id="tw-chart-contract"></select></label>
+              </div>
+              <div class="tw-chart-tools">
+                <label>Plot<select id="tw-chart-side"><option value="both">Yes and No</option><option value="yes">Yes only</option><option value="no">No only</option></select></label>
+                <label><input type="checkbox" id="tw-show-avg" checked> Show moving averages</label>
+              </div>
+              <div id="tw-price-legend" class="tw-legend"></div>
+              <div id="tw-price-chart" class="plot-host" role="group" aria-label="Outcome prices and trailing averages"></div>
+            </div>
+            <div id="tw-performance"></div>
+            <div id="tw-ledger"></div>
+          </section>
+          <details class="replay-method white-card" open>
+            <summary>Trading assumptions &amp; fees</summary>
+            <div class="method-grid">
+              <div><h3>Contracts &amp; dates</h3><p>Market status refers to the exchange’s current status. By default a contract needs a tradable close on every UTC day of the window, plus prices on the preceding days for its moving average. Enter a smaller minimum to accept a consecutive stretch anywhere in the window. A missing day breaks the stretch. A tradable close is above 0% and below 100%. Today's incomplete UTC day is excluded.</p>
+                <p>Fetch reads recent election listings in batches, checks exchange dates, then verifies prices for up to 500 candidates until it fills the requested count or runs out. Each batch is shuffled without replacement in random mode or checked by descending volume in manual mode. The picker shows each contract’s longest qualifying stretch. When you set a shorter minimum, trades can also use other observed dates in the window. Selecting on historical coverage can favor more actively traded contracts.</p></div>
+              <div><h3>Signals &amp; averages</h3><p>Kalshi uses daily candles with trades. Polymarket uses the last available hourly observation on each UTC date. Each outcome’s average uses the previous N consecutive daily closes. A gap resets it. No is estimated as 100% minus Yes. For example, if the Yes average is 42%, a buy rule 5 percentage points below it triggers at 37% or lower.</p></div>
+              <div><h3>Fills &amp; positions</h3><p>A signal uses the last price observed on a UTC day. A buy or sell fills at the next consecutive day’s last observed price, strictly between 0% and 100%. Both the buy signal and fill must fall inside any buy-date limits. Each strategy can hold one position per contract, sell it, and buy again. Fractional shares and independent fixed stakes assume sufficient liquidity and funding.</p>
+              <p>At settlement a winning share pays $1. Open positions use their last observed mark. A final-day sale requires a tradable observation that day. The ledger shows the actual valuation date.</p></div>
+              <div><h3>Costs &amp; return</h3><p>Net P&amp;L deducts estimated fees on each buy and sell. Settlement and an open mark carry no exit fee. Return divides total net P&amp;L by the sum of entry stakes and entry fees across all purchases. The simulation omits spreads, slippage and rebates.</p>
+                <p>For C shares at price p in dollars, the modeled taker fee is C × p × (1 − p) × rate. Kalshi uses 0.07 times its multiplier, with modeled cash debits rounded up and credits rounded down to $0.0001. Polymarket uses its reported rate, or 0.05 for elections, rounded to five decimals. Published waivers and fee-disabled markets pay zero. Historical fee schedules may differ. <a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">Kalshi fees</a> · <a href="https://docs.polymarket.com/trading/fees" target="_blank" rel="noopener">Polymarket fees</a></p></div>
+            </div>
+          </details>
+        </section>
+      </section>
+      <footer>
+        <span>Election market data from Kalshi &amp; Polymarket</span
+        ><button id="footer-sources" class="text-button">
+          Sources &amp; methodology <span data-icon="out"></span>
+        </button>
+      </footer>
+    </main>
+    <dialog id="detail-dialog">
+      <div class="dialog-frame">
+        <div class="modal-top">
+          <div class="small-label">Contract detail</div>
+          <button class="icon-button close-dialog" aria-label="Close contract details">
+            <span data-icon="x"></span>
+          </button>
+        </div>
+        <div id="detail-content"></div>
+      </div>
+    </dialog>
+    <dialog id="source-dialog">
+      <div class="dialog-frame">
+        <div class="modal-top">
+          <div class="small-label">Market data</div>
+          <button class="icon-button close-dialog" aria-label="Close data sources">
+            <span data-icon="x"></span>
+          </button>
+        </div>
+        <h2>Sources &amp; methodology</h2>
+        <div class="source-copy">
+          <h3>Kalshi</h3>
+          <p>
+            Election series, market quotes, settlements and daily trade candles come from Kalshi’s public
+            market data API. Volume is measured in contracts.
+          </p>
+          <a
+            href="https://docs.kalshi.com/getting_started/quick_start_market_data"
+            target="_blank"
+            rel="noopener"
+            >Kalshi market data <span data-icon="out"></span
+          ></a>
+          <h3>Polymarket</h3>
+          <p>
+            Election-tagged markets and outcomes come from Gamma. Price history comes from the CLOB endpoint
+            for the displayed outcome token. The Data API supplies resolution timestamps and settlement
+            estimates when available. Volume is shown in US dollars.
+          </p>
+          <a href="https://docs.polymarket.com/market-data/overview" target="_blank" rel="noopener"
+            >Polymarket market data <span data-icon="out"></span
+          ></a>
+          <h3>Reading the dashboard</h3>
+          <p>
+            Each row represents one exchange contract. A Yes price of 42¢ implies a market probability of 42%.
+            The opening view uses the last complete live fetch saved in this browser, or the bundled exchange
+            snapshots on a first visit. Selecting a contract retrieves its price history.
+          </p>
+          <p>
+            Fetch all live follows both exchanges’ election listings to the last page. Live fetch options can
+            narrow the search. Explore ranks all loaded matches by reported lifetime volume, highest first,
+            using each exchange’s own units. Select a column heading for a temporary sort.
+            Backtest returns up to your maximum of 500 matching contracts by election or individual contract
+            listing time. The assignment list is sorted by volume. Price history is requested when you run a backtest.
+          </p>
+          <h3>Election atlas</h3>
+          <p>
+            Highlights reflect active contracts in the loaded listings. The atlas assigns countries using
+            exchange jurisdiction metadata and election names. Contracts with an unidentified location remain
+            in the market explorer.
+          </p>
+          <a
+            href="https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/"
+            target="_blank"
+            rel="noopener"
+            >Country boundaries · Natural Earth <span data-icon="out"></span
+          ></a>
+          <div id="snapshot-dates" class="source-dates"></div>
+        </div>
+      </div>
+    </dialog>
+  </body>
+</html>

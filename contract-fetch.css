@@ -1,0 +1,161 @@
+#backtest-view .discovery-panel {
+  background: var(--panel-control);
+  margin-inline: var(--panel-gutter);
+  padding: clamp(16px, 1.6vw, 24px);
+  border-radius: 4px;
+}
+#backtest-view .discovery-panel .section-heading h2 {
+  font-size: clamp(20px, 1.7vw, 26px);
+}
+.fetch-fields {
+  display: grid;
+  grid-template-columns: 0.75fr 1fr 1fr 1fr 1.25fr 1.1fr;
+  gap: 12px;
+  border: 0;
+  padding: 0;
+  margin: 16px 0 0;
+  min-inline-size: 0;
+}
+.fetch-fields label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: var(--panel-text);
+  font-size: 13px;
+}
+#contract-fetch .fetch-fields {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+#contract-fetch .fetch-query {
+  grid-column: auto;
+}
+@media (max-width: 850px) {
+  #contract-fetch .fetch-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.contract-fetch-form .fetch-fields :is(input, select) {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  height: 38px;
+  font: inherit;
+  color: var(--ink);
+  background-color: var(--panel-control);
+  border: 0;
+  border-bottom: 1px solid var(--panel-input-rule);
+  border-radius: 2px;
+  padding: 5px 8px;
+}
+.contract-fetch-form input[type='search']::placeholder {
+  color: var(--panel-soft);
+  opacity: 1;
+}
+.fetch-note,
+.fetch-status {
+  margin: 9px 0 0;
+  color: var(--panel-soft);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.fetch-status {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.fetch-status:empty,
+.fetch-exclusions:empty {
+  display: none;
+}
+.fetch-exclusions,
+.fetch-actions,
+.fetch-assign {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+.fetch-exclusions {
+  margin-top: 10px;
+}
+.fetch-exclusions button {
+  border: 0;
+  border-radius: 3px;
+  padding: 6px 9px;
+  background: var(--panel-selected);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+.fetch-actions {
+  margin-top: 13px;
+  gap: 12px;
+}
+.fetch-assign {
+  flex-wrap: nowrap;
+  color: var(--panel-text);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.fetch-assign input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--panel-accent);
+}
+.fetch-actions .btn-primary {
+  min-height: 36px;
+}
+#backtest-view .assignment-actions {
+  flex-wrap: wrap;
+}
+@media (max-width: 1100px) {
+  .fetch-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 650px) {
+  .fetch-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fetch-assign {
+    flex-basis: 100%;
+  }
+}
+@media (max-width: 380px) {
+  #backtest-view .discovery-panel {
+    margin-inline: 8px;
+    padding: 12px;
+  }
+  .fetch-fields {
+    gap: 10px 6px;
+  }
+  .contract-fetch-form .fetch-fields :is(input, select) {
+    padding-inline: 3px;
+  }
+}
+
+#live-options {
+  margin-inline: var(--panel-gutter);
+  color: var(--panel-text);
+}
+#live-options > summary {
+  cursor: pointer;
+  width: fit-content;
+  padding-block: 9px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 480;
+}
+#live-options[open] { padding-bottom: 14px; }
+#live-fetch .fetch-fields { margin-top: 6px; }
+#live-fetch select option { color: var(--ink); background: var(--panel-dialog); }
+.picker-pages {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--panel-text);
+}
