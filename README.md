@@ -2,6 +2,8 @@
 
 Explore election contracts on Kalshi and Polymarket, inspect their price histories, and simulate trading rules in your browser. **No exchange account, wallet or API key is required.**
 
+Don’t want to install anything? [Try the live dashboard on Vercel.](https://election-market-dashboard.vercel.app/)
+
 The dashboard is intentionally simple so anyone can run it and modify it. It uses plain HTML, CSS and JavaScript. To try a change, edit the layout in `index.html` or a strategy rule in `backtest.js`, save the file, and refresh your browser. A small Node.js server handles public data requests from both exchanges.
 
 ![Atlas overview with the United States selected and a panel listing Kalshi and Polymarket election contracts](docs/screenshots/overview.png)
@@ -21,9 +23,9 @@ The dashboard is intentionally simple so anyone can run it and modify it. It use
 | How you open it | What works |
 | --- | --- |
 | Double-click `index.html` in the extracted folder | The atlas, bundled market listings and featured price chart load without starting a server. The page tries to fetch exchange data directly. In Chrome, a Polymarket listing request succeeded and the browser blocked a Kalshi listing request under its cross-origin policy. Keep the HTML, scripts, styles and assets together. |
-| Run `node server.mjs` and open the local address | The browser and data relay share one origin. This is the supported way to fetch from both exchanges and run backtests using fresh history. Internet access is required for exchange requests. |
+| Run `node server.mjs` and open the local address | The browser and data relay share one origin. You can fetch from both exchanges and run backtests using fresh history, just as on the hosted dashboard. Internet access is required for exchange requests. |
 
-The local address works on the computer running the server. To share a link to the full dashboard, deploy the frontend and the Node relay together, for example behind an HTTPS reverse proxy that forwards requests to the loopback listener. GitHub Pages can serve the static files. The relay requires a host that runs Node.js.
+The local address works on the computer running the server. To host your own copy, import this repository into Vercel. The included configuration publishes the frontend as static files and runs the data relay as a Vercel Function. GitHub Pages can also serve the static files. The relay requires a host that runs Node.js.
 
 ## Find an election contract
 
@@ -77,7 +79,7 @@ The replay assumes independent fixed stakes, unlimited funding and execution at 
 
 1. `app.js` draws the starting view from the bundled snapshots or the browser’s last complete live catalog. Fetching, opening the archive, inspecting a contract, or running a replay requests additional data as needed.
 2. `discovery.js` coordinates pagination, deduplication, restrictions, progress and cancellation. `kalshi.js` reads election series, events, market details and price candles. `polymarket.js` uses Gamma for listings, the Data API for resolution information and the CLOB price-history endpoint for observations. [Kalshi market data](https://docs.kalshi.com/getting_started/quick_start_market_data) · [Polymarket market data](https://docs.polymarket.com/market-data/overview)
-3. When Node serves the page, `api.js` sends reads to `/api/fetch` on the same host. `server.mjs` forwards requests to an allowlist of public exchange hosts and paths and returns JSON. Opening the HTML file directly selects the browser-to-exchange path.
+3. On Vercel and the local server, `api.js` sends reads to `/api/fetch` on the same host. Both use `api/fetch.mjs` to forward requests to an allowlist of public exchange hosts and paths and return JSON. Opening the HTML file directly selects the browser-to-exchange path.
 4. `backtest.js` and `trading.js` calculate positions, fees and performance in the browser. Chart and UI files render the results. The globe uses bundled Natural Earth geometry and the interface uses bundled Montserrat fonts. [Natural Earth](https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/) · [Montserrat license](montserrat-license.txt)
 
 ## Troubleshooting and checks
