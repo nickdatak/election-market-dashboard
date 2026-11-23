@@ -284,7 +284,7 @@
       $('atlas-open-country').setAttribute('aria-label', 'Explore contracts in ' + country);
     }
 
-    function preview(id) {
+    function preview(id, position) {
       hovering = id;
       if (!id) {
         hideTip();
@@ -298,6 +298,7 @@
         current = id;
         renderCard();
       }
+      if (position) positionTip(position);
     }
     function pin(id, recenter = false) {
       if (!features.has(id)) {
@@ -337,6 +338,7 @@
     let renderer = null;
     if (canvas.getContext?.('2d'))
       renderer = window.ElectionGlobe.create(canvas, {
+        motionRegion: $('atlas').parentElement,
         onHover: preview,
         onSelect: (id) => (id ? pin(id) : unpin()),
         onViewChange: positionLabels,
@@ -357,7 +359,7 @@
     window.addEventListener('scroll', queueLabels, { passive: true });
     window.addEventListener('hashchange', queueLabels);
     window.addEventListener('electionthemechange', () => countrySilhouette(shape, features.get(current)));
-    canvas.addEventListener('pointermove', (event) => {
+    function positionTip(event) {
       if (event.pointerType === 'touch' || event.buttons || !hovering) {
         hideTip();
         return;
@@ -370,7 +372,8 @@
       const top = event.clientY - rect.top - 30;
       tip.style.left = Math.max(4, Math.min(left, rect.width - tip.offsetWidth - 4)) + 'px';
       tip.style.top = Math.max(4, Math.min(top, rect.height - tip.offsetHeight - 4)) + 'px';
-    });
+    }
+    canvas.addEventListener('pointermove', positionTip);
     canvas.addEventListener('pointerleave', hideTip);
     canvas.addEventListener('pointerdown', hideTip);
     const steps = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, 15], ArrowDown: [0, -15] };
@@ -380,6 +383,10 @@
       renderer?.rotate(lon, lat);
     }
     canvas.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        renderer?.slowRotation();
+      }
       if (Object.hasOwn(steps, e.key)) {
         e.preventDefault();
         rotate(...steps[e.key]);
@@ -455,7 +462,13 @@
       $('atlas-status').textContent = message;
       $('atlas-status').hidden = !message;
     }
-    return { update, requestState, countryName, countriesFor };
+    function setInteractive(enabled) {
+      const map = $('atlas-map');
+      map.inert = !enabled;
+      map.setAttribute('aria-hidden', String(!enabled));
+      renderer?.setAutoRotate(enabled);
+    }
+    return { update, requestState, countryName, countriesFor, setInteractive };
   }
   window.ElectionAtlas = Object.freeze({ create });
 })();

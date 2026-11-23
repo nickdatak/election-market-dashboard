@@ -101,8 +101,7 @@
     query = '',
     pageNo = 0,
     currentRows = [];
-  let countryFilter = null,
-    atlas;
+  let countryFilter = null;
   let atlasInputs = [];
   const liveTimes = new WeakMap();
   let liveForm, liveScan, liveView = null, liveMessage = '', livePaintTimer, liveSearchStarted = false;
@@ -302,16 +301,6 @@
       : times.length
         ? prefix + ' · ' + asOf(times[0])
         : 'On-demand exchange data';
-    if (!atlas) {
-      atlas = window.ElectionAtlas.create({
-        openMarket: openDetail,
-        showCountry: filterByCountry,
-        loadMore: liveAction,
-        sourceName,
-        sourceTag,
-        cents,
-      });
-    }
     const view = visibleLive();
     const inputs = venues.map((key) => view?.[key] ?? data.live[key].markets);
     if (!inputs.every((rows, index) => rows === atlasInputs[index])) {
@@ -723,8 +712,7 @@
     }
     page = nextPage;
     document.body.dataset.page = page;
-    $('atlas-map').inert = page !== 'overview';
-    $('atlas-map').setAttribute('aria-hidden', String(page !== 'overview'));
+    atlas.setInteractive(page === 'overview');
     countryFilter = null;
     resetBoardOrder();
     source = 'all';
@@ -928,6 +916,14 @@
   window.addEventListener('hashchange', navigate);
   const openingCanvas = document.querySelector('#opening-screen[open] canvas');
   if (openingCanvas) window.ElectionGlobe.drawOpeningGlobe(openingCanvas);
+  const atlas = window.ElectionAtlas.create({
+    openMarket: openDetail,
+    showCountry: filterByCountry,
+    loadMore: liveAction,
+    sourceName,
+    sourceTag,
+    cents,
+  });
   navigate();
   restoreLive();
 })();

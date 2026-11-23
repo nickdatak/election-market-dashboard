@@ -126,6 +126,7 @@ body {
 }
 #opening-screen::backdrop { background: transparent; }
 .opening-scene {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: clamp(18px, 3.5vmin, 32px);
@@ -230,6 +231,55 @@ strong {
   pointer-events: none;
   background-color: var(--page);
   background-image: radial-gradient(ellipse 67% 72% at var(--orb-x) var(--orb-y), var(--scene-glow), transparent 84%);
+}
+.starfield,
+.starfield::before,
+.starfield::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.starfield {
+  color: rgb(205 215 241 / 66%);
+  background-image:
+    radial-gradient(circle at 7% 19%, currentColor .55px, transparent 1.2px),
+    radial-gradient(circle at 31% 83%, currentColor .4px, transparent 1px),
+    radial-gradient(circle at 49% 36%, currentColor .65px, transparent 1.4px),
+    radial-gradient(circle at 69% 6%, currentColor .35px, transparent 1px),
+    radial-gradient(circle at 78% 71%, currentColor .5px, transparent 1.1px),
+    radial-gradient(circle at 96% 48%, currentColor .35px, transparent 1px);
+  background-size: 291px 237px;
+}
+:root[data-theme='light'] .starfield { color: rgb(79 93 130 / 52%); }
+.starfield::before {
+  content: '';
+  opacity: .68;
+  background-image:
+    radial-gradient(circle at 12% 63%, currentColor .8px, transparent 1.65px),
+    radial-gradient(circle at 29% 34%, currentColor .4px, transparent 1.15px),
+    radial-gradient(circle at 55% 9%, currentColor .6px, transparent 1.35px),
+    radial-gradient(circle at 73% 88%, currentColor .75px, transparent 1.55px),
+    radial-gradient(circle at 89% 42%, currentColor .45px, transparent 1.2px);
+  background-size: 329px 289px;
+}
+.starfield::after {
+  content: '';
+  opacity: .8;
+  background-image:
+    radial-gradient(ellipse 1.1px 2.7px at 19% 27%, currentColor 24%, transparent),
+    radial-gradient(ellipse 2.7px 1.1px at 19% 27%, currentColor 24%, transparent),
+    radial-gradient(circle at 42% 77%, currentColor .55px, transparent 1.4px),
+    radial-gradient(circle at 67% 46%, currentColor .45px, transparent 1.1px),
+    radial-gradient(circle at 91% 81%, currentColor .8px, transparent 1.65px);
+  background-size: 437px 347px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .starfield::before { animation: star-twinkle 5.5s ease-in-out -2s infinite alternate; }
+  .starfield::after { animation: star-twinkle 8s ease-in-out -7s infinite alternate-reverse; }
+}
+@keyframes star-twinkle {
+  from { opacity: .34; }
+  to { opacity: .95; }
 }
 .atlas-map {
   position: absolute;

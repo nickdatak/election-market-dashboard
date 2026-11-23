@@ -4,6 +4,7 @@
   const RAD = Math.PI / 180;
   const TAU = 2 * Math.PI;
   const HOME = [-30, 28];
+  const IDLE_DEGREES_PER_SECOND = 2;
   // Pack the neutral land inks once. Each dot adds its own antialiased coverage.
   function packedInks(inks) {
     return inks.map((ink) => {
@@ -433,6 +434,9 @@
       dots;
     let cameraRevision = 0;
     let view = camera(lon, lat);
+    let spinSpeed = IDLE_DEGREES_PER_SECOND, lastSpin = null, spinTimer = 0;
+    let sceneVisible = true, autoRotate = true;
+    let mousePosition = null, lastHoverCheck = 0;
     let moved = true,
       viewChanged = true,
       dead = false,
@@ -446,6 +450,17 @@
 
     function invalidate() {
       if (!frame && !dead) frame = requestAnimationFrame(paint);
+    }
+
+    function restartClock() {
+      clearTimeout(spinTimer);
+      lastSpin = null;
+      invalidate();
+    }
+
+    function slowRotation() {
+      spinSpeed = IDLE_DEGREES_PER_SECOND / 2;
+      restartClock();
     }
 
     function changeTheme() {
@@ -589,14 +604,20 @@
 
     function paint(now) {
       frame = 0;
+      clearTimeout(spinTimer);
       if (dead || !radius) return;
+      const canSpin = autoRotate && sceneVisible && !document.hidden && !reducedMotion.matches && !pointer;
       if (animation) {
+        lastSpin = null;
         const t = clamp((now - animation.start) / animation.duration, 0, 1);
         const k = t * t * (3 - 2 * t);
         setView(animation.lon + animation.dx * k, animation.lat + animation.dy * k);
         if (t < 1) invalidate();
         else animation = null;
-      }
+      } else if (canSpin) {
+        if (lastSpin !== null) setView(lon + spinSpeed * Math.min(now - lastSpin, 150) / 1000, lat);
+        lastSpin = now;
+      } else lastSpin = null;
       if (moved) updateSurface();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -624,10 +645,16 @@
       drawPins();
       ctx.restore();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
+      // The country under a stationary mouse can change as the Earth turns.
+      if (canSpin && mousePosition && !animation && now - lastHoverCheck >= 160) {
+        lastHoverCheck = now;
+        hover(hit(mousePosition), mousePosition);
+      }
       if (viewChanged) {
         viewChanged = false;
         options.onViewChange?.(projectCountry);
       }
+      if (canSpin && !animation) spinTimer = setTimeout(invalidate, 1000 / 24);
     }
 
     function coord(event) {
@@ -669,13 +696,13 @@
       return nearby;
     }
 
-    function hover(id) {
+    function hover(id, position) {
       canvas.style.cursor = pointer?.dragged ? 'grabbing' : id ? 'pointer' : 'grab';
       if (hovered === id) return;
       if ((hovered || selected) !== (id || selected)) moved = true;
       hovered = id;
       invalidate();
-      options.onHover?.(id);
+      options.onHover?.(id, position);
     }
 
     function down(event) {
@@ -683,13 +710,19 @@
       const [x, y] = coord(event);
       if (x * x + y * y > 1) return;
       animation = null;
+      lastSpin = null;
+      mousePosition = null;
       pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, lon, lat, dragged: false };
       canvas.setPointerCapture(event.pointerId);
     }
 
     function move(event) {
       if (!pointer) {
-        if (event.pointerType !== 'touch') hover(hit(event));
+        if (event.pointerType !== 'touch') {
+          mousePosition = { clientX: event.clientX, clientY: event.clientY };
+          lastHoverCheck = performance.now();
+          hover(hit(event));
+        }
         return;
       }
       if (pointer.id !== event.pointerId || pointer.scrolling || !radius) return;
@@ -712,11 +745,17 @@
       pointer = null;
       if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
       const id = event.type === 'pointerup' ? hit(event) : null;
-      hover(event.pointerType === 'touch' ? null : id);
-      if (tap) options.onSelect?.(id);
+      if (event.type === 'pointerup' && event.pointerType !== 'touch')
+        mousePosition = { clientX: event.clientX, clientY: event.clientY };
+      hover(mousePosition ? id : null);
+      if (tap) {
+        slowRotation();
+        options.onSelect?.(id);
+      } else restartClock();
     }
 
     function leave() {
+      mousePosition = null;
       if (!pointer) hover(null);
     }
 
@@ -724,6 +763,8 @@
       if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return;
       const dx = wrap(longitude - lon),
         dy = clamp(latitude, -90, 90) - lat;
+      mousePosition = null;
+      lastSpin = null;
       hover(null);
       animation = null;
       if (reducedMotion.matches || Math.hypot(dx, dy) < 0.5) setView(lon + dx, lat + dy);
@@ -750,12 +791,24 @@
     for (const [type, fn] of Object.entries(events)) canvas.addEventListener(type, fn);
     const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(resize) : null;
     observer?.observe(canvas);
+    const visibility = typeof IntersectionObserver === 'function' ? new IntersectionObserver(([entry]) => {
+      sceneVisible = entry.isIntersecting;
+      restartClock();
+    }) : null;
+    visibility?.observe(options.motionRegion || canvas);
+    document.addEventListener('visibilitychange', restartClock);
+    reducedMotion.addEventListener('change', restartClock);
     window.addEventListener('resize', resize);
     window.addEventListener('electionthemechange', changeTheme);
     resize();
 
     return {
       projectCountry,
+      slowRotation,
+      setAutoRotate(enabled) {
+        autoRotate = enabled;
+        restartClock();
+      },
       setActive(ids) {
         active = new Set(Array.from(ids || [], code));
         invalidate();
@@ -777,13 +830,18 @@
         fly(baseLon + longitude, baseLat + latitude);
       },
       reset() {
+        spinSpeed = IDLE_DEGREES_PER_SECOND;
         fly(...HOME);
       },
       destroy() {
         dead = true;
         animation = null;
         cancelAnimationFrame(frame);
+        clearTimeout(spinTimer);
         observer?.disconnect();
+        visibility?.disconnect();
+        document.removeEventListener('visibilitychange', restartClock);
+        reducedMotion.removeEventListener('change', restartClock);
         window.removeEventListener('resize', resize);
         window.removeEventListener('electionthemechange', changeTheme);
         for (const [type, fn] of Object.entries(events)) canvas.removeEventListener(type, fn);

@@ -42,6 +42,7 @@
   </head>
   <body data-page="overview">
     <dialog id="opening-screen" aria-label="Loading election dashboard" aria-describedby="opening-caption">
+      <div class="starfield" aria-hidden="true"></div>
       <figure class="opening-scene">
         <div class="opening-globe" aria-hidden="true">
           <canvas width="320" height="320"></canvas>
@@ -88,12 +89,13 @@
       </symbol>
     </svg>
     <div class="space-scene" id="space-scene">
+      <div class="starfield" aria-hidden="true"></div>
       <div class="atlas-map" id="atlas-map">
         <canvas
           id="atlas-canvas"
           role="img"
           tabindex="0"
-          aria-label="Interactive globe of election markets. Drag or use the arrow keys to rotate. Use Find a country to select a location."
+          aria-label="Interactive globe of election markets. Drag or use the arrow keys to rotate. Click, tap or press Enter for half speed. Reset view restores normal speed. Use Find a country to select a location."
           >Use Find a country to explore election markets.</canvas
         >
         <div id="atlas-callouts" class="atlas-callouts" aria-hidden="true"></div>
@@ -210,8 +212,8 @@
             <div class="atlas-key"><i></i> Active election markets</div>
             <div class="atlas-navigation">
               <span class="atlas-drag"
-                ><span data-icon="move"></span><span class="atlas-desktop-copy">Drag to rotate</span
-                ><span class="atlas-touch-copy">Swipe to rotate</span></span
+                ><span data-icon="move"></span><span class="atlas-desktop-copy">Drag to rotate · click to slow</span
+                ><span class="atlas-touch-copy">Swipe to rotate · tap to slow</span></span
               >
               <button id="atlas-west" type="button" aria-label="Rotate globe west" title="Rotate west">
                 <span data-icon="left"></span>
@@ -219,7 +221,7 @@
               <button id="atlas-east" type="button" aria-label="Rotate globe east" title="Rotate east">
                 <span data-icon="right"></span>
               </button>
-              <button id="atlas-reset" type="button" aria-label="Reset globe view" title="Reset view">
+              <button id="atlas-reset" type="button" aria-label="Reset globe view and rotation speed" title="Reset view and speed">
                 <span data-icon="reset"></span>
               </button>
             </div>
