@@ -290,6 +290,30 @@ strong {
   transform: translate(-50%, -50%);
   isolation: isolate;
 }
+/* Keep the overview globe in the grid with its controls while the sky stays fixed. */
+body[data-page='overview'] .space-scene {
+  display: contents;
+}
+body[data-page='overview'] .space-scene::before,
+body[data-page='overview'] .space-scene > .starfield {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+body[data-page='overview'] .space-scene::before {
+  content: '';
+  background: inherit;
+}
+body[data-page='overview'] .atlas-map {
+  grid-area: 1 / 2;
+  position: relative;
+  inset: auto;
+  transform: none;
+  justify-self: center;
+  width: min(100%, var(--atlas-available-height), 790px);
+  height: auto;
+  aspect-ratio: 1;
+}
 #atlas-canvas {
   position: absolute;
   inset: 0;
@@ -528,13 +552,15 @@ footer {
   pointer-events: auto;
 }
 .workspace-lead {
+  --atlas-rail-width: clamp(205px, 21vw, 314px);
+  /* Reserve room for the header, the rotation controls and their spacing. */
+  --atlas-available-height: max(220px, calc(100svh - var(--mast-h) - 82px));
   display: grid;
-  grid-template-columns: clamp(205px, 21.5vw, 321px) minmax(0, 1fr) clamp(230px, 21vw, 314px);
-  grid-template-rows: minmax(min-content, 1fr) auto;
+  grid-template-columns: var(--atlas-rail-width) minmax(0, 1fr) var(--atlas-rail-width);
+  grid-template-rows: auto auto;
   align-items: start;
-  gap: 24px 12px;
-  min-height: calc(var(--scene-h) - var(--mast-h));
-  padding: 38px 0 9px;
+  gap: clamp(10px, 2svh, 24px) 12px;
+  padding: clamp(10px, 2svh, 22px) 0 9px;
 }
 .atlas,
 .atlas-scene {
@@ -655,7 +681,18 @@ footer {
 .atlas-card {
   grid-area: 1 / 3;
   align-self: center;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  max-height: var(--atlas-available-height);
+}
+.atlas-card > * {
+  flex: none;
+}
+.atlas-contracts {
+  flex-shrink: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 .atlas-card-meta,
 .atlas-card-label,
@@ -917,7 +954,7 @@ body:not([data-page='overview']) .atlas-map {
     --orb-x: 51%;
   }
   .workspace-lead {
-    grid-template-columns: 195px minmax(0, 1fr) 205px;
+    --atlas-rail-width: 200px;
   }
 
   .atlas-counts {
@@ -953,23 +990,9 @@ body:not([data-page='overview']) .atlas-map {
   dialog:modal {
     overscroll-behavior: contain;
   }
-  /* Keep the stars behind the page while the interactive Earth and its controls scroll together. */
-  body[data-page='overview'] .space-scene {
-    display: contents;
-  }
-  body[data-page='overview'] .space-scene > .starfield {
-    position: fixed;
-    z-index: -1;
-  }
   body[data-page='overview'] .atlas-map {
     grid-area: 2 / 1;
-    position: relative;
-    inset: auto;
-    transform: none;
-    justify-self: center;
     width: min(100%, 465px, 68svh);
-    height: auto;
-    aspect-ratio: 1;
     overflow: clip;
   }
   .mast-inner {
@@ -1085,6 +1108,7 @@ body:not([data-page='overview']) .atlas-map {
   .atlas-card {
     grid-area: 4 / 1;
     padding: 16px;
+    max-height: none;
   }
 
   .atlas-country-heading {
