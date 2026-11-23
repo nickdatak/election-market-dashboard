@@ -8,8 +8,8 @@ The dashboard is intentionally simple so anyone can run it and modify it. It use
 
 ## Run it locally
 
-1. Download the repository using **Code → Download ZIP** and extract it, or clone it with Git. A private repository requires GitHub access to download.
-2. Open a terminal in the extracted folder that contains `index.html` and `server.mjs`. Install a current Node.js LTS release if `node --version` is unavailable. The server uses built-in Node.js modules and fetch, so you can skip package installation and build steps. [Download Node.js](https://nodejs.org/en/download)
+1. On GitHub, choose **Code → Download ZIP** and extract it, or run `git clone https://github.com/nickdatak/election-market-dashboard.git`.
+2. Open a terminal in the project folder that contains `index.html` and `server.mjs`. Install a current Node.js LTS release if `node --version` is unavailable. The server uses built-in Node.js modules and fetch, so you can skip package installation and build steps. [Download Node.js](https://nodejs.org/en/download)
 3. Start the server and leave the terminal open.
 
    ```sh
@@ -23,7 +23,7 @@ The dashboard is intentionally simple so anyone can run it and modify it. It use
 | Double-click `index.html` in the extracted folder | The atlas, bundled market listings and featured price chart load without starting a server. The page tries to fetch exchange data directly. In Chrome, a Polymarket listing request succeeded and the browser blocked a Kalshi listing request under its cross-origin policy. Keep the HTML, scripts, styles and assets together. |
 | Run `node server.mjs` and open the local address | The browser and data relay share one origin. This is the supported way to fetch from both exchanges and run backtests using fresh history. Internet access is required for exchange requests. |
 
-The local address works on the computer running the server. To give other people a link, deploy the frontend **and** the Node relay, for example behind an HTTPS reverse proxy that forwards requests to the loopback listener. A static host such as GitHub Pages serves the files but does not execute `server.mjs`. Repository privacy controls who can download the code. A private hosted dashboard also needs access control at the host or proxy.
+The local address works on the computer running the server. To share a link to the full dashboard, deploy the frontend and the Node relay together, for example behind an HTTPS reverse proxy that forwards requests to the loopback listener. GitHub Pages can serve the static files. The relay requires a host that runs Node.js.
 
 ## Find an election contract
 
